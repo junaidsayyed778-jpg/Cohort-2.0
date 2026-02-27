@@ -1,0 +1,41 @@
+.search-bar {
+  position: fixed;        /* 🔝 top pe chipka rahe */
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: #2f2f2f; /* हल्का dark gray */
+  padding: 12px 20px;
+  display: flex;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  z-index: 1000;
+}
+
+.search-bar form {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  max-width: 500px;
+}
+
+.search-bar input {
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: none;
+  outline: none;
+  font-size: 16px;
+}
+
+.search-bar button {
+  padding: 10px 18px;
+  background-color: #444;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.search-bar button:hover {
+  background-color: #555;
+}

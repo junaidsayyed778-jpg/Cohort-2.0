@@ -1,0 +1,46 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body{
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #222;
+    overflow: hidden;
+    anchor-name:--some-mouse;
+
+    
+}
+.box{
+   
+    height: 50px;
+    width: 100px;
+    border-radius: 20px;
+
+}
+.box:hover {
+    anchor-name:--some-mouse;
+    animation: move 0.5s forwards;
+    transform: scale(1.2) !important;
+}
+body:has(.box:hover) .box{
+    transform: scale(0.8);
+} 
+
+.red{
+    background-color: red;
+    
+   
+}
+.blue{
+    background-color: blue;
+    
+}
+.green{
+    background-color: green;
+   
+}

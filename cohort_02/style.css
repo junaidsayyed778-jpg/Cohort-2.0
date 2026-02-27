@@ -1,0 +1,144 @@
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'helvetica neue';
+  color: white;
+}
+
+html,
+body {
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  background-color: black;
+}
+
+main {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(to right bottom, rgb(26, 26, 26), rgb(30, 30, 30), black);
+  padding: 20px;
+    overflow: auto;
+}
+
+section {
+  height: 100vh; 
+  width: 350px;
+  background-color: black;
+  border-radius: 10px;
+  margin: auto;
+}
+.all-reels {
+  height: 100vh;   /* FIX */
+  width: 100%;
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+  overflow-y: scroll; /* important */
+}
+.all-reels::-webkit-scrollbar {
+    display: none;
+ 
+ 
+}
+
+
+.reel{
+    height: 100%;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+     scroll-snap-align: start;
+  scroll-snap-stop: always;
+
+    
+}
+.reel video{
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+    border-radius: 10px;
+}
+.reel .bottom{
+    padding: 30px 20px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+}
+.bottom .user{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    
+}
+.bottom .user h4{
+    font-weight: 500;
+    font-size: 16px;
+}
+.bottom .user button{
+    padding: 8px 16px;
+    border: none;
+    border-radius: 20px;
+    background-color: rgb(255, 0, 128);
+    color: white;
+    font-weight: 500;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.bottom .user img{
+    height: 40px;
+    width: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid white;
+}
+
+.bottom>h3{
+    font-weight: 500;
+    font-size: 20px;
+}
+.right {
+    position: absolute;
+    right: 10px;
+    bottom: 200px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+
+    background: linear-gradient(to right, rgba(0,0,0,0.3), rgba(0,0,0,0.7)); /* FIX */
+    padding: 10px 10px;
+    border-radius: 20px;
+}
+
+.right i{
+    font-size: 28px;
+    cursor: pointer;
+    color: white;
+  
+}
+.right h6{
+    font-size: 14px;
+    font-weight: 400;
+    text-align: center;
+}
+.like, .comment, .share, .menu{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.right > div h4{
+  pointer-events: none;
+}
+
+.right > div h6{
+  pointer-events: none;
+}
+
