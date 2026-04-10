@@ -17,20 +17,20 @@ async function sendTokenResponse(user, res){
         user:{
             id: user._id,
             email: user.email,
-            contract: user.contract,
+            contact: user.contact,
             fullname: user.fullname,
             role: user.role
         }
     })
 }
 export const register = async (req, res)=>{
-    const { email, contract , password , fullname} = req.body
+    const { email, contact , password , fullname, isSeller} = req.body
 
     try{
         const existingUser = await userModel.findOne({
             $or:[
                 {email},
-                {contract}
+                {contact}
             ]
         })
 
@@ -42,9 +42,10 @@ export const register = async (req, res)=>{
 
         const user = await userModel.create({
             email,
-            contract,
+            contact,
             password,
-            fullname
+            fullname,
+            role: isSeller ? "seller" : "buyer"
         })
         await sendTokenResponse(user, res, "user registered successfully")
     }catch(err){
