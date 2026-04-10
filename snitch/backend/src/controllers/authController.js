@@ -1,5 +1,5 @@
 import { config } from "../config/config.js"
-import userModel from "../models/userModel"
+import userModel from "../models/userModel.js"
 import jwt from "jsonwebtoken"
 
 async function sendTokenResponse(user, res){

@@ -10,5 +10,5 @@ if(!process.env.JWT_SECRET){
 }
 export const config = {
     MONGO_URI: process.env.MONGO_URI,
-    JWT_SECRET: process.env.JWT.SECRET 
+    JWT_SECRET: process.env.JWT_SECRET 
 }
