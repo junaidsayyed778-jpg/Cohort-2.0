@@ -21,7 +21,7 @@ export const validateRegisterUser = [
   body("fullname")
     .notEmpty()
     .withMessage("Full name is required")
-    .length({ min: 3 })
+    .isLength({ min: 3 })
     .withMessage("Full name must be least 3 characters long"),
 
     validateRequest
