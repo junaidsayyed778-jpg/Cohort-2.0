@@ -8,23 +8,28 @@ import {
   login,
   register,
 } from "../controllers/authController.js";
-import authMiddleware from "../middleware/authMiddleware.js";
 import passport from "passport";
+import { config } from "../config/config.js";
 
 const router = Router();
 
-router.get("/", authMiddleware);
 router.post("/register", validateRegisterUser, register);
 router.post("/login", validateLoginUser, login);
 router.get(
   "/google",
-  passport.authenticate("google", { scope: ["profile", "email"], prompt: "select_account" }),
+  passport.authenticate("google", {
+    scope: ["profile", "email"],
+    prompt: "select_account",
+  }),
 );
 router.get(
   "/google/callback",
   passport.authenticate("google", {
     session: false,
-    failureRedirect: "http://localhost:5173/login",
+    failureRedirect:
+      config.NODE_ENV == "development "
+        ? "http://localhost:5173/login"
+        : "/login",
   }),
   googleCallback,
 );

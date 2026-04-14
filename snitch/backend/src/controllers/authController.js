@@ -78,6 +78,7 @@ export const login = async (req, res) => {
 }
 
 export const googleCallback = async (req, res) => {
+    console.log(req.user)
     try {
         const profile = req.user
         const email = profile.emails[0].value
@@ -89,6 +90,7 @@ export const googleCallback = async (req, res) => {
         if (!user) {
             user = await userModel.create({
                 email,
+                googleId: id,
                 fullname,
                 contact: "N/A",
                 password: "google-oauth-" + profile.id,

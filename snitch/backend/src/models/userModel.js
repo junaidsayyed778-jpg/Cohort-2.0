@@ -10,6 +10,9 @@ const userSchema = new mongoose.Schema({
         type: String,
         enum: ["buyer", "seller"],
         default: "buyer"
+    },
+    googleId: {
+        type: String,
     }
 })
 
