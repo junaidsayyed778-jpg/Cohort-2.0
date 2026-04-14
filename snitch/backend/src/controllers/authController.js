@@ -76,3 +76,42 @@ export const login = async (req, res) => {
     }
     await sendTokenResponse(user, res, "User logged in successfully")
 }
+
+export const googleCallback = async (req, res) => {
+    try {
+        const profile = req.user
+        const email = profile.emails[0].value
+        const fullname = profile.displayName
+
+        // Find existing user or create a new one
+        let user = await userModel.findOne({ email })
+
+        if (!user) {
+            user = await userModel.create({
+                email,
+                fullname,
+                contact: "N/A",
+                password: "google-oauth-" + profile.id,
+                role: "buyer",
+            })
+        }
+
+        // Generate JWT and set cookie
+        const token = jwt.sign(
+            { id: user._id },
+            config.JWT_SECRET,
+            { expiresIn: "7d" }
+        )
+
+        res.cookie("token", token, {
+            secure: false,
+            sameSite: "lax",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        })
+
+        res.redirect("http://localhost:5173/")
+    } catch (err) {
+        console.error("Google callback error:", err)
+        res.redirect("http://localhost:5173/login")
+    }
+}

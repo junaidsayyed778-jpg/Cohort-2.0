@@ -206,6 +206,32 @@ export default function Login() {
                                 </button>
                             </div>
                         </form>
+
+                        {/* Divider */}
+                        <div className="flex items-center gap-4 pt-6">
+                            <div className="flex-1 h-px" style={{ background: "#4d4732" }} />
+                            <span
+                                className="text-[10px] tracking-[0.2em] uppercase"
+                                style={{ fontFamily: "Inter, sans-serif", color: "#999077" }}
+                            >
+                                or
+                            </span>
+                            <div className="flex-1 h-px" style={{ background: "#4d4732" }} />
+                        </div>
+
+                        {/* Continue with Google */}
+                        <a
+                            href="http://localhost:5000/api/auth/google"
+                            className="w-full h-12 md:h-14 flex items-center justify-center gap-3 font-bold uppercase tracking-[0.15em] rounded-lg border-2 transition-all hover:brightness-125 cursor-pointer mt-4"
+                            style={{
+                                fontFamily: "Inter, sans-serif",
+                                borderColor: "#4d4732",
+                                color: "#e5e2e1",
+                                background: "transparent",
+                            }}
+                        >
+                            Continue with Google
+                        </a>
                     </div>
                 </div>
 
