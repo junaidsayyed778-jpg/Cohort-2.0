@@ -14,10 +14,6 @@ const productSchema = new mongoose.Schema({
     ref: "user",
     required: true,
   },
-  price: {
-    type: Number,
-    required: true,
-  },
   currency: {
     type: String,
     enum: ["USD", "EUR", "JPY", "INR"],
@@ -42,3 +38,7 @@ const productSchema = new mongoose.Schema({
     },
   ],
 });
+
+
+const productModel = mongoose.model("product", productSchema)
+export default productModel
