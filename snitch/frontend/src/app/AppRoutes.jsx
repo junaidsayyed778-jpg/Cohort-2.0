@@ -35,13 +35,13 @@ export const routes = createBrowserRouter([
     children: [
       {
         path: "/seller/create-product",
-        element: <ProtectedRoute>
+        element: <ProtectedRoute role="seller">
           <CreateProduct />
         </ProtectedRoute>
       },
       {
         path: "/seller/dashboard",
-        element: <ProtectedRoute>
+        element: <ProtectedRoute role="seller">
           <Dashboard />
         </ProtectedRoute>
       }
