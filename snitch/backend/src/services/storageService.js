@@ -1,39 +1,27 @@
-import ImageKit from "@imagekit/nodejs";
+import ImageKit from "imagekit";
 import { config } from "../config/config.js";
 
-const client = new ImageKit({
-  privateKey: config.IMAGEKIT_PRIVATE_KEY, // Fixed typo
+const imagekit = new ImageKit({
   publicKey: config.IMAGEKIT_PUBLIC_KEY,
-  urlEndpoint: config.IMAGEKIT_URL_ENDPOINT, 
-  timeout: 60000,
-
-  
+  privateKey: config.IMAGEKIT_PRIVATE_KEY,
+  urlEndpoint: config.IMAGEKIT_URL_ENDPOINT,
 });
 
+/**
+ * Upload a file buffer to ImageKit using the `imagekit` v6 SDK.
+ * Credentials verified working via listFiles test.
+ */
 export async function uploadFile({ buffer, fileName, folder = "snitch" }) {
-  try {
-    console.log("Uploading to ImageKit:", {
-      fileName,
-      folder,
- folder: folder,
-      useUniqueFileName: true,    });
+  const sizeInMB = (buffer.length / (1024 * 1024)).toFixed(2);
+  console.log(`[ImageKit] Uploading: ${fileName} (${sizeInMB} MB) → publicKey: ${config.IMAGEKIT_PUBLIC_KEY?.slice(0, 12)}...`);
 
-    // ✅ Call ImageKit's upload method, NOT uploadFile!
-    const result = await client.files.upload({
-      file: buffer,              // ✅ ImageKit expects 'file'
-      fileName: fileName,        // ✅ Filename
-      folder: folder,            // ✅ Folder path
-      useUniqueFileName: true    // ✅ Prevents overwrites
-    });
+  const result = await imagekit.upload({
+    file: buffer,
+    fileName: fileName,
+    folder: folder,
+    useUniqueFileName: true,
+  });
 
-    console.log("✓ ImageKit upload success:", result.url);
-    // Return only url and alt (alt can be fileName or custom)
-    return {
-      url: result.url,
-      alt: fileName
-    };
-  } catch (err) {
-    console.error("ImageKit upload error:", err);
-
-  }
+  console.log(`[ImageKit] ✓ Success: ${result.url}`);
+  return { url: result.url, alt: fileName };
 }

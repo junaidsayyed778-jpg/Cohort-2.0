@@ -11,13 +11,14 @@ export async function createProduct(req, res) {
       return res.status(400).json({ message: "At least one image is required" });
     }
 
-    const images = await Promise.all(req.files.map(async (file) => {
-      // uploadFile now returns { url, alt }
-      return await uploadFile({
+    const images = [];
+    for (const file of req.files) {
+      const uploadResult = await uploadFile({
         buffer: file.buffer,
         fileName: file.originalname
       });
-    }));
+      images.push(uploadResult);
+    }
 
     const product = new productModel({
       title,
