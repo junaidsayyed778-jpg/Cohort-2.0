@@ -24,13 +24,14 @@ function EditorialInput({
     <div className="relative group">
       <label
         htmlFor={id}
-        className="block mb-2 transition-colors duration-200"
+        className="block mb-3 transition-colors duration-200"
         style={{
           fontFamily: "Inter, sans-serif",
-          fontSize: "9px",
-          letterSpacing: "0.22em",
+          fontSize: "11px",
+          fontWeight: 500,
+          letterSpacing: "0.18em",
           textTransform: "uppercase",
-          color: focused ? "#ffd700" : "#999077",
+          color: focused ? "#ffd700" : "#6b6347",
         }}
       >
         {label}
@@ -49,17 +50,19 @@ function EditorialInput({
         required={required}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
-        className="w-full bg-transparent border-0 border-b-2 pb-3 pt-1 focus:outline-none text-sm transition-all duration-200"
+        className="w-full bg-transparent border-0 border-b-2 pb-4 pt-1 focus:outline-none transition-all duration-200"
         style={{
           fontFamily: "Inter, sans-serif",
+          fontSize: "15px",
           color: "#e5e2e1",
-          borderColor: focused ? "#ffd700" : "#4d4732",
+          borderColor: focused ? "#ffd700" : "#2e2c20",
           caretColor: "#ffd700",
+          letterSpacing: "-0.01em",
         }}
         maxLength={maxLength}
       />
 
-      {/* Gold underline that expands from center */}
+      {/* Gold underline expands from center */}
       <div
         className="absolute bottom-0 h-[2px] transition-all duration-300"
         style={{
@@ -69,15 +72,14 @@ function EditorialInput({
         }}
       />
 
-      {/* Live char count */}
       {maxLength && (
-        <div className="flex justify-end mt-1">
+        <div className="flex justify-end mt-2">
           <span
             style={{
               fontFamily: "Inter, sans-serif",
-              fontSize: "9px",
-              letterSpacing: "0.1em",
-              color: value.length >= maxLength ? "#ffd700" : "#4d4732",
+              fontSize: "10px",
+              letterSpacing: "0.08em",
+              color: value.length >= maxLength ? "#ffd700" : "#3a3820",
               transition: "color 0.2s",
             }}
           >
@@ -96,13 +98,14 @@ function EditorialTextarea({ id, label, placeholder, value, onChange, rows = 5, 
     <div className="relative">
       <label
         htmlFor={id}
-        className="block mb-2 transition-colors duration-200"
+        className="block mb-3 transition-colors duration-200"
         style={{
           fontFamily: "Inter, sans-serif",
-          fontSize: "9px",
-          letterSpacing: "0.22em",
+          fontSize: "11px",
+          fontWeight: 500,
+          letterSpacing: "0.18em",
           textTransform: "uppercase",
-          color: focused ? "#ffd700" : "#999077",
+          color: focused ? "#ffd700" : "#6b6347",
         }}
       >
         {label}
@@ -119,13 +122,15 @@ function EditorialTextarea({ id, label, placeholder, value, onChange, rows = 5, 
         rows={rows}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
-        className="w-full bg-transparent border-0 border-b-2 pb-3 pt-1 focus:outline-none text-sm resize-none transition-all duration-200"
+        className="w-full bg-transparent border-0 border-b-2 pb-4 pt-1 focus:outline-none resize-none transition-all duration-200"
         style={{
           fontFamily: "Inter, sans-serif",
+          fontSize: "15px",
           color: "#e5e2e1",
-          borderColor: focused ? "#ffd700" : "#4d4732",
+          borderColor: focused ? "#ffd700" : "#2e2c20",
           caretColor: "#ffd700",
-          lineHeight: "1.75",
+          lineHeight: "1.8",
+          letterSpacing: "-0.01em",
         }}
       />
 
@@ -138,14 +143,13 @@ function EditorialTextarea({ id, label, placeholder, value, onChange, rows = 5, 
         }}
       />
 
-      {/* Live char count */}
-      <div className="flex justify-end mt-1">
+      <div className="flex justify-end mt-2">
         <span
           style={{
             fontFamily: "Inter, sans-serif",
-            fontSize: "9px",
-            letterSpacing: "0.1em",
-            color: maxLength && value.length >= maxLength ? "#ffd700" : "#4d4732",
+            fontSize: "10px",
+            letterSpacing: "0.08em",
+            color: maxLength && value.length >= maxLength ? "#ffd700" : "#3a3820",
             transition: "color 0.2s",
           }}
         >
@@ -163,13 +167,14 @@ function EditorialSelect({ id, label, value, onChange, options, required }) {
     <div className="relative">
       <label
         htmlFor={id}
-        className="block mb-2 transition-colors duration-200"
+        className="block mb-3 transition-colors duration-200"
         style={{
           fontFamily: "Inter, sans-serif",
-          fontSize: "9px",
-          letterSpacing: "0.22em",
+          fontSize: "11px",
+          fontWeight: 500,
+          letterSpacing: "0.18em",
           textTransform: "uppercase",
-          color: focused ? "#ffd700" : "#999077",
+          color: focused ? "#ffd700" : "#6b6347",
         }}
       >
         {label}
@@ -184,12 +189,14 @@ function EditorialSelect({ id, label, value, onChange, options, required }) {
         required={required}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
-        className="w-full bg-transparent border-0 border-b-2 pb-3 pt-1 focus:outline-none text-sm appearance-none cursor-pointer transition-all duration-200"
+        className="w-full bg-transparent border-0 border-b-2 pb-4 pt-1 focus:outline-none appearance-none cursor-pointer transition-all duration-200"
         style={{
           fontFamily: "Inter, sans-serif",
+          fontSize: "15px",
           color: "#e5e2e1",
-          borderColor: focused ? "#ffd700" : "#4d4732",
+          borderColor: focused ? "#ffd700" : "#2e2c20",
           caretColor: "#ffd700",
+          letterSpacing: "-0.01em",
           backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23999077' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
           backgroundRepeat: "no-repeat",
           backgroundPosition: "right 0px center",
@@ -222,19 +229,21 @@ function EditorialSelect({ id, label, value, onChange, options, required }) {
 /** Section label — small ALL-CAPS gold divider */
 function SectionLabel({ children }) {
   return (
-    <div className="flex items-center gap-4 mb-10">
+    <div className="flex items-center gap-5 mb-12">
       <span
         style={{
-          fontFamily: "Inter, sans-serif",
-          fontSize: "9px",
-          letterSpacing: "0.3em",
+          fontFamily: "Manrope, sans-serif",
+          fontSize: "11px",
+          fontWeight: 700,
+          letterSpacing: "0.25em",
           textTransform: "uppercase",
           color: "#ffd700",
+          whiteSpace: "nowrap",
         }}
       >
         {children}
       </span>
-      <div className="flex-1 h-px" style={{ background: "#4d4732", opacity: 0.4 }} />
+      <div className="flex-1 h-px" style={{ background: "linear-gradient(90deg, #4d4732 0%, transparent 100%)", opacity: 0.6 }} />
     </div>
   );
 }
@@ -499,7 +508,7 @@ export default function CreateProduct() {
       images.forEach(({ file }) => formData.append("images", file));
 
       await handleCreateProduct(formData);
-      navigate("/");
+      navigate("/seller/dashboard");
     } catch (err) {
       setError(err?.response?.data?.message || "Something went wrong. Please try again.");
     } finally {
@@ -516,69 +525,112 @@ export default function CreateProduct() {
           LEFT SIDEBAR — sticky branding
       ══════════════════════════════ */}
       <aside
-        className="hidden lg:flex flex-col justify-between w-64 xl:w-72 flex-shrink-0 px-10 py-12 sticky top-0 h-screen"
-        style={{ background: "#0e0e0e" }}
+        className="hidden lg:flex flex-col justify-between w-72 xl:w-80 flex-shrink-0 px-10 py-14 sticky top-0 h-screen"
+        style={{ background: "#0c0c0c", borderRight: "1px solid #1a1a1a" }}
       >
         {/* Ambient glow */}
         <div
-          className="pointer-events-none absolute top-[-60px] left-[-60px] w-64 h-64 rounded-full"
-          style={{ background: "#ffd700", opacity: 0.08, filter: "blur(80px)" }}
+          className="pointer-events-none absolute top-[-80px] left-[-80px] w-80 h-80 rounded-full"
+          style={{ background: "#ffd700", opacity: 0.06, filter: "blur(100px)" }}
         />
 
         <div className="relative z-10">
           {/* Logo */}
           <button
             type="button"
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-2 mb-16 group w-fit cursor-pointer bg-transparent border-none p-0"
+            onClick={() => navigate("/")}
+            className="flex items-center gap-2 mb-14 group w-fit cursor-pointer bg-transparent border-none p-0"
           >
             <span
-              className="text-xl font-black tracking-[-0.05em] uppercase"
+              className="text-2xl font-black tracking-[-0.05em] uppercase"
               style={{ fontFamily: "Manrope, sans-serif", color: "#ffd700" }}
             >
               SNITCH
             </span>
+            <span
+              className="px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-widest"
+              style={{ background: "#1c1b00", color: "#ffd700", letterSpacing: "0.15em" }}
+            >
+              Seller
+            </span>
           </button>
 
           {/* Page title */}
-          <div className="space-y-3">
+          <div className="mb-12">
             <p
               style={{
                 fontFamily: "Inter, sans-serif",
-                fontSize: "9px",
+                fontSize: "10px",
+                fontWeight: 500,
                 letterSpacing: "0.3em",
                 textTransform: "uppercase",
-                color: "#4d4732",
+                color: "#3a3820",
+                marginBottom: "12px",
               }}
             >
-              Seller Dashboard
+              New Listing
             </p>
             <h1
               className="leading-none tracking-tight"
               style={{
                 fontFamily: "Manrope, sans-serif",
-                fontSize: "clamp(2rem, 3vw, 2.8rem)",
+                fontSize: "clamp(2.4rem, 3.5vw, 3.2rem)",
                 fontWeight: 800,
                 color: "#e5e2e1",
-                letterSpacing: "-0.03em",
+                letterSpacing: "-0.04em",
+                lineHeight: 1.05,
               }}
             >
-              New<br />
+              Create a<br />
               <span style={{ color: "#ffd700" }}>Product.</span>
             </h1>
             <p
-              className="mt-4 leading-relaxed"
+              className="mt-5 leading-relaxed"
               style={{
                 fontFamily: "Inter, sans-serif",
-                fontSize: "12px",
-                color: "#999077",
-                lineHeight: "1.7",
+                fontSize: "13px",
+                color: "#5a5640",
+                lineHeight: "1.75",
               }}
             >
-              Fill in the product details below
-              and publish it to your store once
-              you're satisfied.
+              Add your product details,
+              set pricing, and upload photos
+              to publish to your storefront.
             </p>
+          </div>
+
+          {/* Step indicators */}
+          <div className="space-y-4">
+            {[
+              { num: "01", label: "Product Info" },
+              { num: "02", label: "Pricing" },
+              { num: "03", label: "Images" },
+            ].map(({ num, label }) => (
+              <div key={num} className="flex items-center gap-3">
+                <span
+                  style={{
+                    fontFamily: "Manrope, sans-serif",
+                    fontSize: "11px",
+                    fontWeight: 700,
+                    color: "#ffd700",
+                    opacity: 0.5,
+                    minWidth: "24px",
+                  }}
+                >
+                  {num}
+                </span>
+                <span
+                  style={{
+                    fontFamily: "Inter, sans-serif",
+                    fontSize: "12px",
+                    color: "#3a3820",
+                    letterSpacing: "0.05em",
+                  }}
+                >
+                  {label}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -641,7 +693,7 @@ export default function CreateProduct() {
         </header>
 
         {/* Form container — fluid on desktop, capped on mobile */}
-        <div className="w-full px-6 sm:px-10 lg:px-12 xl:px-16 py-10 xl:py-14 xl:max-w-none">
+        <div className="w-full px-8 sm:px-12 lg:px-14 xl:px-20 py-12 xl:py-16 xl:max-w-none">
 
           {/* Mobile page title */}
           <div className="lg:hidden mb-12">
@@ -680,9 +732,9 @@ export default function CreateProduct() {
             <div className="xl:grid xl:grid-cols-2 xl:gap-x-16 xl:items-start">
 
               {/* ── LEFT COL: Product Info ── */}
-              <section className="mb-16 xl:mb-0">
+              <section className="mb-20 xl:mb-0">
                 <SectionLabel>01 — Product Info</SectionLabel>
-                <div className="space-y-12">
+                <div className="space-y-14">
                   <EditorialInput
                     id="title"
                     label="Product Title"
@@ -801,17 +853,19 @@ export default function CreateProduct() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full h-14 font-extrabold uppercase tracking-[0.2em] rounded-lg transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center gap-3"
+                className="w-full h-16 font-extrabold uppercase tracking-[0.22em] rounded-xl transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center gap-3"
                 style={{
-                  fontFamily: "Inter, sans-serif",
+                  fontFamily: "Manrope, sans-serif",
                   fontSize: "13px",
+                  fontWeight: 800,
                   background: loading
-                    ? "#4d4732"
+                    ? "#2a2619"
                     : "linear-gradient(135deg, #ffe16d 0%, #ffd700 60%, #e9c400 100%)",
-                  color: "#221b00",
+                  color: loading ? "#4d4732" : "#1a1300",
                   boxShadow: loading
                     ? "none"
-                    : "0 8px 32px rgba(255, 215, 0, 0.18)",
+                    : "0 12px 40px rgba(255, 215, 0, 0.22), 0 4px 16px rgba(255, 215, 0, 0.12)",
+                  letterSpacing: "0.22em",
                 }}
                 onMouseEnter={(e) => {
                   if (!loading) e.currentTarget.style.filter = "brightness(1.1)";

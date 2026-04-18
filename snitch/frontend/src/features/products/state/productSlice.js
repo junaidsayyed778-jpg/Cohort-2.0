@@ -3,11 +3,11 @@ import { createSlice } from "@reduxjs/toolkit";
 const productSlice = createSlice({
     name: "product",
     initialState:{
-        SellerProducts: []
+        sellerProducts: []
     },
     reducers: {
         setSellerProducts: (state, action) => {
-            state.SellerProducts = action.payload
+            state.sellerProducts = action.payload
         }
     }
 })
