@@ -2,17 +2,22 @@ import { config } from "../config/config.js"
 import userModel from "../models/userModel.js"
 import jwt from "jsonwebtoken"
 
-async function sendTokenResponse(user, res){
+async function sendTokenResponse(user, res, message){
     const token = jwt.sign({
         id: user._id,
     }, config.JWT_SECRET,{
         expiresIn: "7d"
     })
 
-    res.cookie("token", token)
+    res.cookie("token", token, {
+        httpOnly: true,
+        secure: false, // Set to true in production
+        sameSite: "lax",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+    })
 
     res.status(200).json({
-        message: "", 
+        message: message || "success", 
         success: true,
         user:{
             id: user._id,
@@ -49,7 +54,7 @@ export const register = async (req, res)=>{
         })
         await sendTokenResponse(user, res, "user registered successfully")
     }catch(err){
-        console.log("error")
+        console.log(err)
         return res.status(500).json({
             message: "Server error"
         })
@@ -90,7 +95,7 @@ export const googleCallback = async (req, res) => {
         if (!user) {
             user = await userModel.create({
                 email,
-                googleId: id,
+                googleId: profile.id,
                 fullname,
                 contact: "N/A",
                 password: "google-oauth-" + profile.id,

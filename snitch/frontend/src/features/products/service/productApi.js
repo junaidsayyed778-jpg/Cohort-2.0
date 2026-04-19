@@ -14,7 +14,12 @@ export async function createProduct(formData){
 }
 
 export async function getSellerProduct(){
-    const response = await productApiService.get("/")
+    const response = await productApiService.get("/seller")
 
+    return response.data
+}
+
+export async function getAllProducts(){
+    const response = await productApiService.get("/")
     return response.data
 }

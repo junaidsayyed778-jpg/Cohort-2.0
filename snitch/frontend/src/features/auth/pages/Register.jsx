@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "../hook/useAuth";
 import { useNavigate } from "react-router";
+import { useSelector } from "react-redux";
 
 /* ── Reusable underline-animated input ── */
 function Field({ id, label, type = "text", placeholder, value, onChange }) {
@@ -41,6 +42,7 @@ export default function Register() {
 
     const { handleRegister } = useAuth()
     const navigate = useNavigate()
+    const { error } = useSelector((state) => state.auth);
 
     const [form, setForm] = useState({
         fullName: "",
@@ -204,6 +206,25 @@ export default function Register() {
                             </p>
                         </div>
 
+                        {/* Error Message */}
+                        {error && (
+                            <div 
+                                className="mb-6 p-4 rounded-lg border flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-300"
+                                style={{ 
+                                    background: "rgba(255, 71, 71, 0.05)", 
+                                    borderColor: "rgba(255, 71, 71, 0.2)",
+                                    color: "#ff4747"
+                                }}
+                            >
+                                <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span className="text-sm font-medium tracking-wide" style={{ fontFamily: "Inter, sans-serif" }}>
+                                    {error}
+                                </span>
+                            </div>
+                        )}
+
                         {/* Form */}
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <Field
@@ -225,7 +246,7 @@ export default function Register() {
                                 id="contactNumber"
                                 label="Contact Number"
                                 type="tel"
-                                placeholder="+91 00000 00000"
+                                placeholder="9876543210"
                                 value={form.contactNumber}
                                 onChange={handle}
                             />

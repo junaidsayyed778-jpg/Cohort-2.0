@@ -1,4 +1,3 @@
-
 import { RouterProvider } from 'react-router'
 import './App.css'
 import { routes } from './AppRoutes.jsx'
@@ -16,7 +15,7 @@ function App() {
   const user = useSelector(state=> state.auth.user)
   console.log(user)
   return (
-<RouterProvider router={routes} />
+    <RouterProvider router={routes} />
   )
 }
 

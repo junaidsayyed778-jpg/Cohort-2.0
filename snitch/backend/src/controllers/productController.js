@@ -50,11 +50,21 @@ export async function createProduct(req, res) {
 export async function getSellerProducts(req, res){
   const seller = req.user
 
-  const product = await productModel.find({ seller: seller._id })
+  const products = await productModel.find({ seller: seller._id }).sort({ _id: -1 })
 
   res.status(200).json({
-    message: "Products fetches successfully",
+    message: "Products fetched successfully",
     success: true,
-    product
+    products
+  })
+}
+
+export async function getAllProducts(req, res){
+  const products = await productModel.find().sort({ _id: -1 })
+
+  return res.status(200).json({
+    message: "Products fetched succcessfully",
+    success: true,
+    products
   })
 }
