@@ -140,3 +140,12 @@ export const getMe = async (req, res) => {
         }
     })
 }
+
+export const logout = async (req, res) => {
+    res.clearCookie("token", {
+        httpOnly: true,
+        secure: false, // Set to true in production
+        sameSite: "lax",
+    })
+    res.status(200).json({ message: "User logged out successfully", success: true })
+}

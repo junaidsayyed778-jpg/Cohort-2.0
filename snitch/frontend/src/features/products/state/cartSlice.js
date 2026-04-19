@@ -1,13 +1,20 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-    items: JSON.parse(localStorage.getItem("cart")) || [],
+    items: [],
+    userId: null,
 };
 
 const cartSlice = createSlice({
     name: "cart",
     initialState,
     reducers: {
+        setCartUserId: (state, action) => {
+            const userId = action.payload;
+            state.userId = userId;
+            const savedCart = localStorage.getItem(`snitch_cart_${userId}`);
+            state.items = savedCart ? JSON.parse(savedCart) : [];
+        },
         addItem: (state, action) => {
             const existingItem = state.items.find(item => item._id === action.payload._id);
             if (existingItem) {
@@ -15,11 +22,15 @@ const cartSlice = createSlice({
             } else {
                 state.items.push({ ...action.payload, quantity: 1 });
             }
-            localStorage.setItem("cart", JSON.stringify(state.items));
+            if (state.userId) {
+                localStorage.setItem(`snitch_cart_${state.userId}`, JSON.stringify(state.items));
+            }
         },
         removeItem: (state, action) => {
             state.items = state.items.filter(item => item._id !== action.payload);
-            localStorage.setItem("cart", JSON.stringify(state.items));
+            if (state.userId) {
+                localStorage.setItem(`snitch_cart_${state.userId}`, JSON.stringify(state.items));
+            }
         },
         updateQuantity: (state, action) => {
             const { id, quantity } = action.payload;
@@ -27,14 +38,22 @@ const cartSlice = createSlice({
             if (item && quantity > 0) {
                 item.quantity = quantity;
             }
-            localStorage.setItem("cart", JSON.stringify(state.items));
+            if (state.userId) {
+                localStorage.setItem(`snitch_cart_${state.userId}`, JSON.stringify(state.items));
+            }
         },
-        clearCart: (state) => {
+        clearCartState: (state) => {
             state.items = [];
-            localStorage.removeItem("cart");
+            state.userId = null;
+        },
+        clearPersistentCart: (state) => {
+            if (state.userId) {
+                localStorage.removeItem(`snitch_cart_${state.userId}`);
+            }
+            state.items = [];
         }
     }
 });
 
-export const { addItem, removeItem, updateQuantity, clearCart } = cartSlice.actions;
+export const { setCartUserId, addItem, removeItem, updateQuantity, clearCartState, clearPersistentCart } = cartSlice.actions;
 export default cartSlice.reducer;

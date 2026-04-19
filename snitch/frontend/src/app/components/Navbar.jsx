@@ -1,6 +1,7 @@
 import { useSelector } from "react-redux";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate, useLocation } from "react-router";
 import { useState } from "react";
+import { useAuth } from "../../features/auth/hook/useAuth";
 
 export default function Navbar() {
     const { user } = useSelector((state) => state.auth);
@@ -8,6 +9,10 @@ export default function Navbar() {
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const navigate = useNavigate();
+    const location = useLocation();
+    const { handleLogout } = useAuth();
+    
+    const isSellerDashboard = location.pathname === "/seller/dashboard";
 
     const cartCount = items.reduce((acc, item) => acc + item.quantity, 0);
 
@@ -47,6 +52,19 @@ export default function Navbar() {
                         {item}
                     </Link>
                 ))}
+                {user?.role === "seller" && (
+                    <Link
+                        to="/seller/dashboard"
+                        className="text-[10px] tracking-[0.25em] uppercase font-black transition-all"
+                        style={{ 
+                            fontFamily: "Inter, sans-serif",
+                            color: isSellerDashboard ? "#ffd700" : "#e5e2e1",
+                            opacity: isSellerDashboard ? 1 : 0.6
+                        }}
+                    >
+                        Seller Dashboard
+                    </Link>
+                )}
             </div>
 
             {/* Actions */}
@@ -93,6 +111,12 @@ export default function Navbar() {
                                 )}
                             </div>
                         </Link>
+                        <button 
+                            onClick={handleLogout}
+                            className="material-symbols-outlined text-[18px] text-[#999077] hover:text-[#ffd700] transition-colors p-1"
+                        >
+                            logout
+                        </button>
                     </div>
                 ) : (
                     <Link

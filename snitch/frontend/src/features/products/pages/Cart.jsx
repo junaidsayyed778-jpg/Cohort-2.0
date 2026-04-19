@@ -1,5 +1,5 @@
 import { useSelector, useDispatch } from "react-redux"
-import { removeItem, updateQuantity, clearCart } from "../state/cartSlice"
+import { removeItem, updateQuantity, clearCartState } from "../state/cartSlice"
 import { Link } from "react-router"
 
 export default function Cart() {
@@ -83,7 +83,7 @@ export default function Cart() {
                         </div>
                         
                         <button 
-                            onClick={() => dispatch(clearCart())}
+                            onClick={() => dispatch(clearCartState())}
                             className="text-[8px] tracking-[0.4em] uppercase text-[#999077] hover:text-[#ffd700] transition-colors"
                         >
                             Clear Shopping Bag

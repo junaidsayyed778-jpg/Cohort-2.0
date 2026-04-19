@@ -1,6 +1,7 @@
 import { useDispatch } from "react-redux"
-import { register, login, getMe } from "../service/authApi"
+import { register, login, getMe, logout } from "../service/authApi"
 import { setLoading, setUser, setError } from "../state/authSlice"
+import { setCartUserId, clearCartState } from "../../products/state/cartSlice"
 
 export const useAuth = () => {
     const dispatch = useDispatch()
@@ -11,6 +12,7 @@ export const useAuth = () => {
 
             const data = await register({ email, contact, password, fullname, isSeller })
             dispatch(setUser(data.user))
+            dispatch(setCartUserId(data.user.id))
             return data.user
 
         } catch (err) {
@@ -26,6 +28,7 @@ export const useAuth = () => {
             const data = await login({ email, password })
 
             dispatch(setUser(data.user))
+            dispatch(setCartUserId(data.user.id))
 
             return data.user
         } catch (err) {
@@ -40,17 +43,29 @@ export const useAuth = () => {
             dispatch(setLoading(true))
             const data = await getMe()
             dispatch(setUser(data.user))
-            dispatch(setLoading(false))
+            dispatch(setCartUserId(data.user.id))
         } catch (err) {
             // Only log if it's not a 401 (which is normal on first load if not logged in)
             if (err.response?.status !== 401) {
                 console.log(err)
             }
             dispatch(setUser(null))
+            dispatch(clearCartState())
         } finally {
             dispatch(setLoading(false))
 
         }
     }
-    return { handleRegister, handleLogin, handleGetMe }
+
+    async function handleLogout() {
+        try {
+            await logout()
+            dispatch(setUser(null))
+            dispatch(clearCartState())
+        } catch (err) {
+            console.error("Logout error:", err)
+        }
+    }
+
+    return { handleRegister, handleLogin, handleGetMe, handleLogout }
 }

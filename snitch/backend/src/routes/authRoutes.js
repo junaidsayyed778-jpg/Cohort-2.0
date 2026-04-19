@@ -8,6 +8,7 @@ import {
   googleCallback,
   login,
   register,
+  logout,
 } from "../controllers/authController.js";
 import passport from "passport";
 import { config } from "../config/config.js";
@@ -33,4 +34,5 @@ router.get(
   googleCallback,
 );
 router.get("/me", authenticateUser, getMe)
+router.post("/logout", logout)
 export default router;

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router';
+import { Navigate, useNavigate } from 'react-router';
 import { useProduct } from '../hook/useProduct';
 import { useSelector } from 'react-redux';
 
@@ -57,10 +57,12 @@ function StatCard({ label, value, subtext, icon }) {
 
 /** Individual Product Card */
 function ProductCard({ product }) {
+  const navigate = useNavigate();
   const imageUrl = product.images?.[0]?.url || "https://placehold.co/600x800/131313/ffd700?text=No+Image";
 
   return (
     <div
+      onClick={() => navigate(`/seller/product/${product._id}`)}
       className="group relative cursor-pointer"
       style={{ fontFamily: "Inter, sans-serif" }}
     >
