@@ -47,7 +47,7 @@ export async function createProduct(req, res) {
   }
 }
 
-export async function getSellerProducts(req, res){
+export async function getSellerProducts(req, res) {
   const seller = req.user
 
   const products = await productModel.find({ seller: seller._id }).sort({ _id: -1 })
@@ -59,12 +59,45 @@ export async function getSellerProducts(req, res){
   })
 }
 
-export async function getAllProducts(req, res){
-  const products = await productModel.find().sort({ _id: -1 })
+export async function getAllProducts(req, res) {
+  const { search } = req.query
+  let query = {}
+
+  if (search) {
+    query = {
+      $or: [
+        { title: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } }
+      ]
+    }
+  }
+
+  const products = await productModel.find(query).sort({ _id: -1 })
 
   return res.status(200).json({
     message: "Products fetched succcessfully",
     success: true,
     products
   })
+}
+
+export async function getProductDetails(req, res) {
+  const { id } = req.params
+
+  const product = await productModel.findById(id)
+
+  if (!product) {
+    return res.status(404).json({
+      message: "Product details not found",
+      success: false,
+      product
+    })
+  }
+
+  return res.status(200).json({
+    message: "Product details fetched successfully",
+    success: true,
+    product
+  })
+
 }

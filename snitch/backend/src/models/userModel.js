@@ -13,6 +13,10 @@ const userSchema = new mongoose.Schema({
     },
     googleId: {
         type: String,
+    },
+    profilePic: {
+        type: String,
+        default: ""
     }
 })
 

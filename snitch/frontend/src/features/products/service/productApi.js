@@ -19,7 +19,13 @@ export async function getSellerProduct(){
     return response.data
 }
 
-export async function getAllProducts(){
-    const response = await productApiService.get("/")
+export async function getAllProducts(search = ""){
+    const url = search ? `/?search=${encodeURIComponent(search)}` : "/"
+    const response = await productApiService.get(url)
+    return response.data
+}
+
+export async function getProductDetails(productId){
+    const response = await productApiService.get(`/detail/${productId}`)
     return response.data
 }

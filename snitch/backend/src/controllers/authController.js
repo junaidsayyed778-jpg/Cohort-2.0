@@ -2,10 +2,10 @@ import { config } from "../config/config.js"
 import userModel from "../models/userModel.js"
 import jwt from "jsonwebtoken"
 
-async function sendTokenResponse(user, res, message){
+async function sendTokenResponse(user, res, message) {
     const token = jwt.sign({
         id: user._id,
-    }, config.JWT_SECRET,{
+    }, config.JWT_SECRET, {
         expiresIn: "7d"
     })
 
@@ -17,29 +17,30 @@ async function sendTokenResponse(user, res, message){
     })
 
     res.status(200).json({
-        message: message || "success", 
+        message: message || "success",
         success: true,
-        user:{
+        user: {
             id: user._id,
             email: user.email,
             contact: user.contact,
             fullname: user.fullname,
-            role: user.role
+            role: user.role,
+            profilePic: user.profilePic
         }
     })
 }
-export const register = async (req, res)=>{
-    const { email, contact , password , fullname, isSeller} = req.body
+export const register = async (req, res) => {
+    const { email, contact, password, fullname, isSeller } = req.body
 
-    try{
+    try {
         const existingUser = await userModel.findOne({
-            $or:[
-                {email},
-                {contact}
+            $or: [
+                { email },
+                { contact }
             ]
         })
 
-        if(existingUser){
+        if (existingUser) {
             return res.status(400).json({
                 message: "User already exists"
             })
@@ -53,7 +54,7 @@ export const register = async (req, res)=>{
             role: isSeller ? "seller" : "buyer"
         })
         await sendTokenResponse(user, res, "user registered successfully")
-    }catch(err){
+    } catch (err) {
         console.log(err)
         return res.status(500).json({
             message: "Server error"
@@ -66,7 +67,7 @@ export const login = async (req, res) => {
 
     const user = await userModel.findOne({ email })
 
-    if(!user){
+    if (!user) {
         return res.status(400).json({
             message: "Invalid email or password"
         })
@@ -74,7 +75,7 @@ export const login = async (req, res) => {
 
     const isMatch = await user.comparePassword(password)
 
-    if(!isMatch){
+    if (!isMatch) {
         return res.status(400).json({
             message: "Invalid email or password"
         })
@@ -123,7 +124,7 @@ export const googleCallback = async (req, res) => {
     }
 }
 
-export const getMe = async(req, res)=> {
+export const getMe = async (req, res) => {
     const user = req.user
 
     res.status(200).json({
@@ -134,7 +135,8 @@ export const getMe = async(req, res)=> {
             email: user.email,
             contact: user.contact,
             fullname: user.fullname,
-            role: user.role
+            role: user.role,
+            profilePic: user.profilePic
         }
     })
 }

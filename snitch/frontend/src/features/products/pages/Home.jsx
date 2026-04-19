@@ -2,14 +2,17 @@ import { useSelector } from "react-redux"
 import { useProduct } from "../hook/useProduct"
 import { useEffect } from "react"
 import ProductCard from "../components/ProductCard"
+import { useLocation } from "react-router"
 
 export default function Home() {
     const products = useSelector((state) => state.product.products)
     const { handleGetAllProducts } = useProduct()
+    const location = useLocation()
+    const query = new URLSearchParams(location.search).get("search")
 
     useEffect(() => {
-        handleGetAllProducts()
-    }, [])
+        handleGetAllProducts(query)
+    }, [query])
 
     return (
         <div className="flex flex-col">
