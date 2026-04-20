@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 
 const SellerProductDetails = () => {
     const { productId } = useParams()
-    const { handleProductsById } = useProduct()
+    const { handleProductsById, handleAddProductVariant } = useProduct()
     const [product, setProduct] = useState(null)
     const [loading, setLoading] = useState(true)
     
@@ -14,11 +14,15 @@ const SellerProductDetails = () => {
 
     // Form State for New Variant
     const [newVariant, setNewVariant] = useState({
+        title: "",
+        description: "",
         stock: 0,
         priceAmount: "",
         attributes: [{ key: "", value: "" }], // Dynamic attributes
         images: []
     })
+    const [imagePreviews, setImagePreviews] = useState([])
+
 
     async function fetchedProductDetails() {
         try {
@@ -60,12 +64,31 @@ const SellerProductDetails = () => {
 
     const handleFileChange = (e) => {
         const selectedFiles = Array.from(e.target.files)
-        if (selectedFiles.length > 7) {
+        if (selectedFiles.length + newVariant.images.length > 7) {
             alert("Maximum 7 images allowed per variant")
             return
         }
-        setNewVariant(prev => ({ ...prev, images: selectedFiles }))
+        
+        const newFiles = [...newVariant.images, ...selectedFiles]
+        setNewVariant(prev => ({ ...prev, images: newFiles }))
+
+        // Create previews
+        const newPreviews = selectedFiles.map(file => URL.createObjectURL(file))
+        setImagePreviews(prev => [...prev, ...newPreviews])
     }
+
+    const removeImage = (index) => {
+        const updatedImages = [...newVariant.images]
+        updatedImages.splice(index, 1)
+        
+        const updatedPreviews = [...imagePreviews]
+        URL.revokeObjectURL(updatedPreviews[index])
+        updatedPreviews.splice(index, 1)
+
+        setNewVariant(prev => ({ ...prev, images: updatedImages }))
+        setImagePreviews(updatedPreviews)
+    }
+
 
     const validateForm = () => {
         // At least one attribute row must be fully filled
@@ -73,19 +96,53 @@ const SellerProductDetails = () => {
         return hasValidAttribute && newVariant.images.length <= 7
     }
 
+    const handleAddNewVariant = async () => {
+        try {
+            setIsSaving(true)
+            
+            // Transform attributes from array [{key, value}] to object {key: value}
+            const attributeMap = {}
+            newVariant.attributes.forEach(attr => {
+                if (attr.key.trim() && attr.value.trim()) {
+                    attributeMap[attr.key.trim()] = attr.value.trim()
+                }
+            })
+
+            const payload = {
+                ...newVariant,
+                attributes: attributeMap
+            }
+
+            await handleAddProductVariant(productId, payload)
+            
+            // Reset state and close modal
+            setNewVariant({
+                title: "",
+                description: "",
+                stock: 0,
+                priceAmount: "",
+                attributes: [{ key: "", value: "" }],
+                images: []
+            })
+            setImagePreviews([])
+            setIsModalOpen(false)
+            
+            // Refresh UI with latest data from vault
+            await fetchedProductDetails()
+
+        } catch (err) {
+            console.error("Failed to add variant", err)
+        } finally {
+            setIsSaving(false)
+        }
+    }
+
     const handleSubmitVariant = async (e) => {
         e.preventDefault()
         if (!validateForm()) return
-
-        setIsSaving(true)
-        // Backend implementation pending as requested
-        console.log("Variant Data to Submit:", newVariant)
-        setTimeout(() => {
-            setIsSaving(false)
-            setIsModalOpen(false)
-            setNewVariant({ stock: 0, priceAmount: "", attributes: [{ key: "", value: "" }], images: [] })
-        }, 1000)
+        await handleAddNewVariant()
     }
+
 
     if (loading) {
         return (
@@ -124,12 +181,20 @@ const SellerProductDetails = () => {
                     <div className="flex gap-4">
                         <button 
                             onClick={() => setIsModalOpen(true)}
-                            className="px-6 py-3 bg-[#ffd700] text-[10px] tracking-[0.3em] font-black uppercase text-[#131313] hover:brightness-110 transition-all flex items-center gap-2"
+                            className="px-6 py-3 border border-[#ffd700] text-[#ffd700] text-[10px] tracking-[0.3em] font-black uppercase hover:bg-[#ffd700]/10 transition-all flex items-center gap-2"
                         >
                             <span className="material-symbols-outlined text-[16px]">add</span>
                             Add Variant
                         </button>
+                        <button 
+                            onClick={() => fetchedProductDetails()}
+                            className="px-6 py-3 bg-[#ffd700] text-[10px] tracking-[0.3em] font-black uppercase text-[#131313] hover:brightness-110 transition-all flex items-center gap-2 shadow-[0_0_20px_rgba(255,215,0,0.2)]"
+                        >
+                            <span className="material-symbols-outlined text-[16px]">save</span>
+                            Save Listing
+                        </button>
                     </div>
+
                 </div>
 
                 <div className="flex flex-col lg:flex-row gap-16 mb-20">
@@ -183,15 +248,32 @@ const SellerProductDetails = () => {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {product.variants?.map((v, idx) => (
-                            <div key={idx} className="bg-[#0c0c0c] border border-[#4d4732]/20 p-6 space-y-4 relative group hover:border-[#ffd700]/30 transition-all">
-                                <div className="flex flex-wrap gap-2">
+                            <Link 
+                                to={`/seller/product/${productId}/variant/${v._id}`}
+                                key={idx} 
+                                className="bg-[#0c0c0c] border border-[#4d4732]/20 p-6 space-y-4 relative group hover:border-[#ffd700]/30 transition-all flex flex-col"
+                            >
+                                {v.images?.length > 0 && (
+                                    <div className="aspect-square bg-[#131313] mb-2 overflow-hidden">
+                                        <img 
+                                            src={v.images[0].url} 
+                                            alt={v.title} 
+                                            className="w-full h-full object-cover grayscale-[0.3] group-hover:grayscale-0 transition-all"
+                                        />
+                                    </div>
+                                )}
+                                <div className="space-y-1">
+                                    <h4 className="text-[11px] font-black uppercase text-[#e5e2e1] tracking-widest">{v.title || "Untitled Variant"}</h4>
+                                    <p className="text-[8px] text-[#999077] uppercase tracking-[0.2em] line-clamp-1">{v.description || "No description"}</p>
+                                </div>
+                                <div className="flex flex-wrap gap-2 pt-2">
                                     {Object.entries(v.attributes).map(([key, val]) => (
-                                        <div key={key} className="px-2 py-1 bg-white/5 border border-white/10 text-[8px] uppercase tracking-widest text-[#999077]">
+                                        <div key={key} className="px-2 py-1 bg-white/5 border border-white/10 text-[7px] uppercase tracking-widest text-[#999077]">
                                             {key}: <span className="text-[#e5e2e1]">{val}</span>
                                         </div>
                                     ))}
                                 </div>
-                                <div className="flex justify-between items-end pt-4 border-t border-white/5">
+                                <div className="mt-auto pt-4 border-t border-white/5 flex justify-between items-end">
                                     <div className="space-y-1">
                                         <p className="text-[8px] uppercase tracking-widest scale-90 origin-left text-[#6b6347]">Inventory</p>
                                         <p className="text-sm font-black text-[#e5e2e1]">{v.stock} UNITS</p>
@@ -200,8 +282,9 @@ const SellerProductDetails = () => {
                                         {v.price.currency} {v.price.amount}
                                     </p>
                                 </div>
-                            </div>
+                            </Link>
                         ))}
+
 
                         <button 
                             onClick={() => setIsModalOpen(true)}
@@ -231,7 +314,30 @@ const SellerProductDetails = () => {
                             <h2 className="text-3xl font-black text-[#e5e2e1] uppercase tracking-tighter">Initialize <span className="text-white">Variant</span></h2>
                         </div>
 
-                        <form onSubmit={handleSubmitVariant} className="space-y-10">
+                        <form onSubmit={handleSubmitVariant} className="space-y-8">
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div className="space-y-4">
+                                    <label className="text-[8px] tracking-[0.3em] uppercase font-black text-[#ffd700]">Variant Title</label>
+                                    <input 
+                                        required
+                                        placeholder="E.G. MIDNIGHT EDITION"
+                                        value={newVariant.title}
+                                        onChange={(e) => setNewVariant({ ...newVariant, title: e.target.value })}
+                                        className="w-full bg-[#131313] border border-[#4d4732] px-4 py-3 text-[11px] font-bold text-[#e5e2e1] outline-none focus:border-[#ffd700] transition-colors uppercase tracking-widest"
+                                    />
+                                </div>
+                                <div className="space-y-4">
+                                    <label className="text-[8px] tracking-[0.3em] uppercase font-black text-[#ffd700]">Brief Insight</label>
+                                    <input 
+                                        placeholder="ONE SENTENCE ESSENCE"
+                                        value={newVariant.description}
+                                        onChange={(e) => setNewVariant({ ...newVariant, description: e.target.value })}
+                                        className="w-full bg-[#131313] border border-[#4d4732] px-4 py-3 text-[11px] font-bold text-[#e5e2e1] outline-none focus:border-[#ffd700] transition-colors uppercase tracking-widest"
+                                    />
+                                </div>
+                            </div>
+
                             
                             {/* Attributes Section */}
                             <div className="space-y-6">
@@ -300,27 +406,55 @@ const SellerProductDetails = () => {
                             </div>
 
                             <div className="space-y-4">
-                                <label className="text-[8px] tracking-[0.3em] uppercase font-black text-[#ffd700]">Media Assets (Optional, Max 7)</label>
-                                <div className="relative">
-                                    <input 
-                                        multiple
-                                        type="file"
-                                        onChange={handleFileChange}
-                                        className="hidden"
-                                        id="variant-images"
-                                        accept="image/*"
-                                    />
-                                    <label 
-                                        htmlFor="variant-images"
-                                        className="w-full h-32 flex flex-col items-center justify-center border-2 border-dashed border-[#4d4732] bg-white/5 cursor-pointer hover:border-[#ffd700]/40 transition-all font-black"
-                                    >
-                                        <span className="material-symbols-outlined text-[#ffd700]/60 mb-2">cloud_upload</span>
-                                        <span className="text-[9px] uppercase tracking-[0.3em]">
-                                            {newVariant.images.length > 0 ? `${newVariant.images.length} Assets Selected` : 'Deploy Perspective Imagery'}
-                                        </span>
-                                    </label>
+                                <div className="flex justify-between items-center">
+                                    <label className="text-[8px] tracking-[0.3em] uppercase font-black text-[#ffd700]">Media Assets ({newVariant.images.length}/7)</label>
+                                    {newVariant.images.length > 0 && (
+                                        <button 
+                                            type="button"
+                                            onClick={() => {
+                                                setNewVariant({...newVariant, images: []})
+                                                setImagePreviews([])
+                                            }}
+                                            className="text-[8px] uppercase tracking-widest text-red-500 font-bold hover:underline"
+                                        >
+                                            Reset Gallery
+                                        </button>
+                                    )}
                                 </div>
+                                
+                                <div className="grid grid-cols-4 md:grid-cols-7 gap-3 mb-4">
+                                    {imagePreviews.map((url, idx) => (
+                                        <div key={idx} className="relative aspect-square bg-white/5 border border-white/10 group">
+                                            <img src={url} className="w-full h-full object-cover grayscale-[0.5]" alt="Preview" />
+                                            <button 
+                                                type="button"
+                                                onClick={() => removeImage(idx)}
+                                                className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                                            >
+                                                <span className="material-symbols-outlined text-[12px]">close</span>
+                                            </button>
+                                        </div>
+                                    ))}
+                                    {newVariant.images.length < 7 && (
+                                        <label 
+                                            htmlFor="variant-images"
+                                            className="aspect-square flex flex-col items-center justify-center border border-dashed border-[#4d4732] bg-white/5 cursor-pointer hover:border-[#ffd700]/40 transition-all"
+                                        >
+                                            <span className="material-symbols-outlined text-[#ffd700]/60 text-[18px]">add</span>
+                                        </label>
+                                    )}
+                                </div>
+
+                                <input 
+                                    multiple
+                                    type="file"
+                                    onChange={handleFileChange}
+                                    className="hidden"
+                                    id="variant-images"
+                                    accept="image/*"
+                                />
                             </div>
+
 
                             <button 
                                 disabled={!validateForm() || isSaving}

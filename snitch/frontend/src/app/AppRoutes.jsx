@@ -10,6 +10,8 @@ import ProductDetails from "../features/products/pages/ProductDetails";
 import Cart from "../features/products/pages/Cart";
 import Profile from "../features/auth/pages/Profile";
 import SellerProductDetails from "../features/products/pages/SellerProductDetails";
+import UpdateVariant from "../features/products/pages/UpdateVariant";
+
 
 export const routes = createBrowserRouter([
   {
@@ -67,7 +69,16 @@ export const routes = createBrowserRouter([
                 <SellerProductDetails />
               </ProtectedRoute>
             )
+          },
+          {
+            path: "/seller/product/:productId/variant/:variantId",
+            element:(
+              <ProtectedRoute role="seller">
+                <UpdateVariant />
+              </ProtectedRoute>
+            )
           }
+
         ],
       },
     ],

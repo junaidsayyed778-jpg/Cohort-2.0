@@ -38,19 +38,31 @@ export default function Cart() {
                         </div>
 
                         <div className="space-y-8">
-                            {items.map((item) => (
-                                <div key={item._id} className="flex gap-6 pb-8 border-b border-[#4d4732]/10 group">
+                            {items.map((item, idx) => (
+                                <div key={`${item._id}-${item.variantId || idx}`} className="flex gap-6 pb-8 border-b border-[#4d4732]/10 group">
                                     <div className="w-24 h-32 md:w-32 md:h-40 bg-[#1c1b1b] overflow-hidden rounded-sm flex-shrink-0">
                                         <img src={item.images?.[0]?.url} alt={item.title} className="w-full h-full object-cover grayscale-[0.3] group-hover:grayscale-0 transition-all duration-700" />
                                     </div>
                                     <div className="flex-1 flex flex-col justify-between py-1">
                                         <div className="flex justify-between items-start">
-                                            <div>
-                                                <h3 className="text-sm md:text-base font-bold uppercase text-[#e5e2e1] mb-1">{item.title}</h3>
-                                                <p className="text-[10px] text-[#999077] uppercase tracking-wider">{item.currency} {item.price?.amount}</p>
+                                            <div className="space-y-2">
+                                                <div>
+                                                    <h3 className="text-sm md:text-base font-bold uppercase text-[#e5e2e1] mb-1">{item.title}</h3>
+                                                    <p className="text-[10px] text-[#999077] uppercase tracking-wider">{item.currency} {item.price?.amount}</p>
+                                                </div>
+                                                {/* Display Attributes */}
+                                                {item.attributes && Object.entries(item.attributes).length > 0 && (
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {Object.entries(item.attributes).map(([key, val]) => (
+                                                            <div key={key} className="px-2 py-0.5 bg-white/5 border border-white/10 text-[7px] tracking-widest uppercase text-[#999077]">
+                                                                {key} <span>{val}</span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
                                             </div>
                                             <button 
-                                                onClick={() => dispatch(removeItem(item._id))}
+                                                onClick={() => dispatch(removeItem({ id: item._id, variantId: item.variantId }))}
                                                 className="text-[#999077] hover:text-red-500 transition-colors"
                                             >
                                                 <span className="material-symbols-outlined text-[20px]">close</span>
@@ -60,14 +72,14 @@ export default function Cart() {
                                         <div className="flex items-center justify-between mt-4">
                                             <div className="flex items-center border border-[#4d4732]/30 rounded-full h-8 px-2 translate-y-2">
                                                 <button 
-                                                    onClick={() => dispatch(updateQuantity({ id: item._id, quantity: item.quantity - 1 }))}
+                                                    onClick={() => dispatch(updateQuantity({ id: item._id, variantId: item.variantId, quantity: item.quantity - 1 }))}
                                                     className="w-6 h-6 flex items-center justify-center text-[#e5e2e1] hover:text-[#ffd700]"
                                                 >
                                                     -
                                                 </button>
                                                 <span className="w-8 text-center text-[10px] font-bold text-[#ffd700]">{item.quantity}</span>
                                                 <button 
-                                                    onClick={() => dispatch(updateQuantity({ id: item._id, quantity: item.quantity + 1 }))}
+                                                    onClick={() => dispatch(updateQuantity({ id: item._id, variantId: item.variantId, quantity: item.quantity + 1 }))}
                                                     className="w-6 h-6 flex items-center justify-center text-[#e5e2e1] hover:text-[#ffd700]"
                                                 >
                                                     +
@@ -81,6 +93,7 @@ export default function Cart() {
                                 </div>
                             ))}
                         </div>
+
                         
                         <button 
                             onClick={() => dispatch(clearCartState())}

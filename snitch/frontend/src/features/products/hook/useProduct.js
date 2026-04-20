@@ -1,38 +1,65 @@
 import { useDispatch } from "react-redux"
-import {getSellerProduct, createProduct, getAllProducts, getProductDetails} from "../service/productApi"
-import { setSellerProducts, setProducts } from "../state/productSlice"
+import { getSellerProduct, createProduct, getAllProducts, getProductDetails, addProductVariant, updateProductVariant } from "../service/productApi"
+
+import { setSellerProducts, setProducts, updateProductInList } from "../state/productSlice"
 
 export const useProduct = () => {
 
     const dispatch = useDispatch()
 
-    async function handleCreateProduct(formData){
+    async function handleCreateProduct(formData) {
         const data = await createProduct(formData)
 
         return data.product
     }
 
-    async function handleGetSellerProduct(){
+    async function handleGetSellerProduct() {
         const data = await getSellerProduct()
 
         dispatch(setSellerProducts(data.products))
         return data.products
     }
 
-    async function handleGetAllProducts(search){
+    async function handleGetAllProducts(search) {
         const data = await getAllProducts(search)
         dispatch(setProducts(data.products))
         return data.products
     }
 
-    async function handleProductsById(productId){
+    async function handleProductsById(productId) {
         const data = await getProductDetails(productId)
         return data.product
     }
-    return{
+
+    async function handleAddProductVariant(productId, newProductVariant) {
+        const data = await addProductVariant(productId, newProductVariant)
+
+        if (data?.product) {
+            dispatch(updateProductInList(data.product))
+        }
+
+        return data
+    }
+
+    async function handleUpdateProductVariant(productId, variantId, formData) {
+        const data = await updateProductVariant(productId, variantId, formData)
+
+        // Assuming API returns the FULL updated product in data.product
+        if (data?.product) {
+            dispatch(updateProductInList(data.product))
+        } else {
+            console.warn("API did not return full product object after updating variant")
+        }
+
+        return data.product
+    }
+
+    return {
         handleCreateProduct,
         handleGetSellerProduct,
         handleGetAllProducts,
-        handleProductsById
+        handleProductsById,
+        handleAddProductVariant,
+        handleUpdateProductVariant
     }
 }

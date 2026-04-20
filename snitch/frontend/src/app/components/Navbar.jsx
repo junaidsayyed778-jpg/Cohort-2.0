@@ -42,16 +42,6 @@ export default function Navbar() {
 
             {/* Navigation links */}
             <div className="hidden lg:flex items-center gap-10">
-                {["New Arrivals", "Collections", "Editorial"].map((item) => (
-                    <Link
-                        key={item}
-                        to="/"
-                        className="text-[10px] tracking-[0.25em] uppercase font-bold hover:opacity-100 opacity-60 transition-opacity"
-                        style={{ fontFamily: "Inter, sans-serif", color: "#e5e2e1" }}
-                    >
-                        {item}
-                    </Link>
-                ))}
                 {user?.role === "seller" && (
                     <Link
                         to="/seller/dashboard"
@@ -66,6 +56,7 @@ export default function Navbar() {
                     </Link>
                 )}
             </div>
+
 
             {/* Actions */}
             <div className="flex items-center gap-4 md:gap-8">

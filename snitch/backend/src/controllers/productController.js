@@ -103,37 +103,156 @@ export async function getProductDetails(req, res) {
 }
 
 export async function addProductVariant(req, res) {
+  try {
+    const productId = req.params.productId;
 
-  const productId = req.params.productId
+    const product = await productModel.findOne({
+      _id: productId,
+      seller: req.user._id
+    });
 
-  const product = await productModel.findOne({
-    _id: productId,
-    seller: req.user._id
-  })
+    if (!product) {
+      return res.status(404).json({
+        message: "Product not found or unauthorized",
+        success: false
+      });
+    }
 
-  if(!product){
-    return res.status(404).json({
-      message: "Product not found",
-      success: false,
+    const files = req.files || [];
+    const images = [];
+
+    if (files.length > 0) {
+      const uploadResults = await Promise.all(
+        files.map((file) =>
+          uploadFile({
+            buffer: file.buffer,
+            fileName: file.originalname
+          })
+        )
+      );
+      images.push(...uploadResults);
+    }
+
+    // Extract data with fallbacks and type conversion
+    const { title, description } = req.body;
+    const priceAmount = Number(req.body.priceAmount || req.body.price || product.price.amount);
+    const stock = Number(req.body.stock || 0);
+    
+    let attributes = {};
+    try {
+      attributes = typeof req.body.attributes === 'string' 
+        ? JSON.parse(req.body.attributes) 
+        : req.body.attributes;
+    } catch (e) {
+      console.error("Error parsing attributes:", e);
+    }
+
+    product.variants.push({
+      title,
+      description,
+      images,
+
+      price: {
+        amount: priceAmount,
+        currency: req.body.priceCurrency || product.currency || "INR"
+      },
+      stock,
+      attributes
+    });
+
+    await product.save();
+
+    return res.status(200).json({
+      message: "Product variant added successfully",
+      success: true,
       product
-    })
+    });
+  } catch (err) {
+    console.error("Add variant error:", err);
+    res.status(500).json({
+      message: "Failed to add product variant",
+      success: false,
+      error: err.message
+    });
   }
-
-  const files = req.files
-  const images = []
-  if(files || files.length !== 0) {
-    (await Promise.all(files.map(async (file) => {
-      const image = await uploadFile({
-        buffer: file.buffer,
-        fileName: file.originalname
-      })
-      return image
-    }))).map(image => images.push(image))
-  }
-
-  const price = req.body.priceAmount
-  const stock = req.body.stock
-  const attributes = JSON.parse(req.body.attributes || "{}")
-
-  console.log(price, stock, attributes, images)
 }
+
+export async function updateProductVariant(req, res) {
+  try {
+    const { productId, variantId } = req.params;
+    const { title, description, priceAmount, stock, attributes } = req.body;
+
+    const product = await productModel.findOne({
+      _id: productId,
+      seller: req.user._id
+    });
+
+    if (!product) {
+      return res.status(404).json({
+        message: "Product not found or unauthorized",
+        success: false
+      });
+    }
+
+    const variant = product.variants.id(variantId);
+    if (!variant) {
+      return res.status(404).json({
+        message: "Variant not found",
+        success: false
+      });
+    }
+
+    // Handle new images if any
+    const files = req.files || [];
+    if (files.length > 0) {
+      const uploadResults = await Promise.all(
+        files.map((file) =>
+          uploadFile({
+            buffer: file.buffer,
+            fileName: file.originalname
+          })
+        )
+      );
+      // For now, we replace images. User can be given option to append later.
+      variant.images = uploadResults;
+    }
+
+    // Update fields if provided using variant.set for better change detection
+    if (title !== undefined) variant.title = title;
+    if (description !== undefined) variant.description = description;
+    if (stock !== undefined) variant.stock = Number(stock);
+    
+    if (priceAmount !== undefined) {
+      variant.set('price.amount', Number(priceAmount));
+    }
+    
+    if (attributes !== undefined) {
+      try {
+        const parsedAttributes = typeof attributes === 'string' 
+          ? JSON.parse(attributes) 
+          : attributes;
+        variant.set('attributes', parsedAttributes);
+      } catch (e) {
+        console.error("Error parsing attributes in update:", e);
+      }
+    }
+
+    // Force Mongoose to detect changes in the variants array/subdocuments
+    product.markModified('variants');
+    await product.save();
+
+    res.status(200).json({
+      message: "Variant updated successfully",
+      success: true,
+      product
+    });
+  } catch (err) {
+    console.error("Update variant error:", err);
+    res.status(500).json({
+      message: "Failed to update variant",
+      success: false,
+      error: err.message
+    });
+  }
+}
+
