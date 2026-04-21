@@ -14,17 +14,31 @@ export const useProduct = () => {
     }
 
     async function handleGetSellerProduct() {
-        const data = await getSellerProduct()
-
+    const data = await getSellerProduct()
+    console.log("📦 [HOOK] handleGetSellerProduct received:", data?.products?.length, "products")
+    
+    if (Array.isArray(data?.products)) {
         dispatch(setSellerProducts(data.products))
-        return data.products
+    } else if (Array.isArray(data)) {
+        dispatch(setSellerProducts(data))
     }
+    return data.products || data
+}
 
-    async function handleGetAllProducts(search) {
-        const data = await getAllProducts(search)
+async function handleGetAllProducts(search) {
+    const data = await getAllProducts(search)
+    console.log("📦 [HOOK] handleGetAllProducts received:", data?.products?.length, "products")
+    
+    // ✅ Dispatch with array, not object
+    if (Array.isArray(data?.products)) {
         dispatch(setProducts(data.products))
-        return data.products
+    } else if (Array.isArray(data)) {
+        dispatch(setProducts(data))
+    } else {
+        console.warn("⚠️ [HOOK] Unexpected data format from getAllProducts:", data)
     }
+    return data.products || data
+}
 
     async function handleProductsById(productId) {
         const data = await getProductDetails(productId)
