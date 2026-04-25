@@ -4,6 +4,7 @@ import morgan from "morgan"
 import cors from "cors"
 import authRoutes from "./routes/authRoutes.js"
 import productRoute from "./routes/productRoute.js"
+import cartRoute from "./routes/cartRoute.js"
 import {Strategy as GoogleStrategy} from "passport-google-oauth20"
 import passport from "passport"
 import { config } from "../src/config/config.js"
@@ -16,7 +17,7 @@ app.use(express.urlencoded({extended: true}))
 app.use(cookieParser())
 app.use(cors({
     origin: ["http://localhost:5173", "http://localhost:5174"],
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     credentials: true
 }))
 
@@ -38,6 +39,7 @@ app.get("/", (req, res) => {
 // Auth routes
 app.use("/api/auth", authRoutes)
 app.use("/api/products", productRoute)
+app.use("/api/cart", cartRoute)
 
 
 export default app
