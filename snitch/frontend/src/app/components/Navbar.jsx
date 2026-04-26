@@ -221,12 +221,15 @@ export default function Navbar() {
                 <nav className="flex flex-col px-6 py-6 gap-1 flex-1">
                     {[
                         { label: "Home", to: "/" },
-                        { label: "Shop", to: "/" },
+                        { label: "New Arrivals", to: "/" },
+                        { label: "Shop All", to: "/" },
+                        { label: "Trending", to: "/" },
                         ...(user?.role === "seller" ? [{ label: "Seller Dashboard", to: "/seller/dashboard" }] : []),
                     ].map((link) => (
                         <Link
                             key={link.to + link.label}
                             to={link.to}
+                            onClick={() => setSidebarOpen(false)}
                             className="py-3 text-[11px] tracking-[0.25em] uppercase font-bold border-b border-[#4d4732]/20 text-[#e5e2e1] hover:text-[#ffd700] transition-colors"
                         >
                             {link.label}
