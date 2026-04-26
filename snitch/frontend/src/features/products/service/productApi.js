@@ -1,7 +1,7 @@
 import axios from "axios"
 
 const productApiService = axios.create({
-    baseURL: "https://snitch-e49i.onrender.com/api/products",
+    baseURL: "https://cohort-2-0-snitch-backend.onrender.com/api/products",
     withCredentials: true,
 })
 
@@ -56,4 +56,4 @@ export async function updateProductVariant(productId, variantId, formData) {
     })
     return response.data
 }
-
+

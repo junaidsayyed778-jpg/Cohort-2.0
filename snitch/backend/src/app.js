@@ -16,7 +16,8 @@ app.use(express.json())
 app.use(express.urlencoded({extended: true}))
 app.use(cookieParser())
 app.use(cors({
-    origin: ["http://localhost:5173", "http://localhost:5174"],
+    origin: ["http://localhost:5173", "http://localhost:5174",
+    "https://cohort-2-0-b7p9.onrender.com"],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     credentials: true
 }))
@@ -25,7 +26,7 @@ app.use(passport.initialize());
 passport.use(new GoogleStrategy ({
     clientID: config.GOOGLE_CLIENT_ID,
     clientSecret: config.GOOGLE_CLIENT_SECRET,
-    callbackURL: "http://localhost:5000/api/auth/google/callback"
+    callbackURL: "https://cohort-2-0-snitch-backend.onrender.com/api/auth/google/callback"
 }, (accessToken, refreshToken, profile, done) =>{
     return done(null, profile)
 }))
