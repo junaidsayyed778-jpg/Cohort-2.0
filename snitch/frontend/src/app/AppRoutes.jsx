@@ -1,4 +1,4 @@
-import { createHashRouter } from "react-router";
+import { createBrowserRouter } from "react-router";
 import Register from "../features/auth/pages/Register";
 import Login from "../features/auth/pages/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -13,40 +13,40 @@ import SellerProductDetails from "../features/products/pages/SellerProductDetail
 import UpdateVariant from "../features/products/pages/UpdateVariant";
 
 
-export const routes = createHashRouter([
+export const routes = createBrowserRouter([
   {
     path: "/",
     element: <Layout />,
     children: [
       {
-        path: "/",
+        index: true,
         element: <Home />,
       },
       {
-        path: "/register",
+        path: "register",
         element: <Register />,
       },
       {
-        path: "/login",
+        path: "login",
         element: <Login />,
       },
       {
-        path: "/product/:productId",
+        path: "product/:productId",
         element: <ProductDetails />
       },
       {
-        path: "/cart",
+        path: "cart",
         element: <Cart />
       },
       {
-        path: "/profile",
+        path: "profile",
         element: <Profile />
       },
       {
-        path: "/seller",
+        path: "seller",
         children: [
           {
-            path: "/seller/create-product",
+            path: "create-product",
             element: (
               <ProtectedRoute role="seller">
                 <CreateProduct />
@@ -54,7 +54,7 @@ export const routes = createHashRouter([
             ),
           },
           {
-            path: "/seller/dashboard",
+            path: "dashboard",
             element: (
               <ProtectedRoute role="seller">
                 <Dashboard />
@@ -63,7 +63,7 @@ export const routes = createHashRouter([
           },
 
           {
-            path: "/seller/product/:productId",
+            path: "product/:productId",
             element:(
               <ProtectedRoute role="seller">
                 <SellerProductDetails />
@@ -71,7 +71,7 @@ export const routes = createHashRouter([
             )
           },
           {
-            path: "/seller/product/:productId/variant/:variantId",
+            path: "product/:productId/variant/:variantId",
             element:(
               <ProtectedRoute role="seller">
                 <UpdateVariant />

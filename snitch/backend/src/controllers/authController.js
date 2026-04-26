@@ -118,10 +118,10 @@ export const googleCallback = async (req, res) => {
             maxAge: 7 * 24 * 60 * 60 * 1000,
         })
 
-        res.redirect("https://cohort-2-0-b7p9.onrender.com/#/")
+        res.redirect("https://cohort-2-0-b7p9.onrender.com/")
     } catch (err) {
         console.error("Google callback error:", err)
-        res.redirect("https://cohort-2-0-b7p9.onrender.com/#/login")
+        res.redirect("https://cohort-2-0-b7p9.onrender.com/login")
     }
 }
 
