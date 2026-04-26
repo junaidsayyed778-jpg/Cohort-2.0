@@ -16,8 +16,11 @@ app.use(express.json())
 app.use(express.urlencoded({extended: true}))
 app.use(cookieParser())
 app.use(cors({
-    origin: ["http://localhost:5173", "http://localhost:5174",
-    "https://cohort-2-0-b7p9.onrender.com"],
+    origin: [
+        "http://localhost:5173", 
+        "http://localhost:5174",
+        "https://cohort-2-0-b7p9.onrender.com",
+    ],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     credentials: true
 }))
