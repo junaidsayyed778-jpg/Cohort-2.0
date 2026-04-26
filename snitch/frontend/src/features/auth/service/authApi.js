@@ -1,7 +1,7 @@
 import axios from "axios"
 
 const authApiInstance = axios.create({
-    baseURL: "/api/auth/",
+    baseURL: "https://snitch-e49i.onrender.com/api/auth/",
     withCredentials: true
 })
 

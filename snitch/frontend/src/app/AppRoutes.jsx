@@ -3,7 +3,7 @@ import Register from "../features/auth/pages/Register";
 import Login from "../features/auth/pages/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Dashboard from "../features/products/pages/Dashboard";
-import CreateProduct from "../features/products/pages/createProduct";
+import CreateProduct from "../features/products/pages/CreateProduct";
 import Home from "../features/products/pages/Home";
 import Layout from "./components/Layout";
 import ProductDetails from "../features/products/pages/ProductDetails";

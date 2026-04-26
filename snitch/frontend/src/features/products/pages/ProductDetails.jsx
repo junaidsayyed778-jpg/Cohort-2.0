@@ -3,6 +3,8 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useProduct } from '../hook/useProduct';
 import { useSelector } from 'react-redux';
 import { useCart } from '../hook/useCart';
+import { getAllProducts } from '../service/productApi';
+import ProductCard from '../components/ProductCard';
 
 // Safely convert Mongoose Map OR plain object attributes → plain JS object
 function normalizeAttrs(attrs) {
@@ -20,6 +22,11 @@ const ProductDetail = () => {
     const [adding, setAdding] = useState(false);
     const [addedFeedback, setAddedFeedback] = useState(false);
     const [stockError, setStockError] = useState('');
+    const [relatedProducts, setRelatedProducts] = useState([]);
+    const [isWishlisted, setIsWishlisted] = useState(false);
+    const [isStickyVisible, setIsStickyVisible] = useState(false);
+    const [showSizeGuide, setShowSizeGuide] = useState(false);
+    const [showLightbox, setShowLightbox] = useState(false);
     const navigate = useNavigate();
     const { handleProductsById } = useProduct();
     const { handleAddToCart, items: cartItems } = useCart();
@@ -41,6 +48,37 @@ const ProductDetail = () => {
             setSelectedAttributes(normalizeAttrs(product.variants[0].attributes));
         }
     }, [product]);
+
+    // Fetch Related Products
+    useEffect(() => {
+        async function fetchRelated() {
+            try {
+                const data = await getAllProducts();
+                const all = data?.products || data;
+                if (Array.isArray(all)) {
+                    // Filter out current product
+                    const filtered = all.filter(p => p._id !== productId).slice(0, 6);
+                    setRelatedProducts(filtered);
+                }
+            } catch (err) {
+                console.error("Failed to fetch related products", err);
+            }
+        }
+        fetchRelated();
+    }, [productId]);
+
+    // Sticky CTA Visibility Logic
+    useEffect(() => {
+        const handleScroll = () => {
+            if (window.scrollY > 800) {
+                setIsStickyVisible(true);
+            } else {
+                setIsStickyVisible(false);
+            }
+        };
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
 
     // Get all unique attribute keys and their values
     const availableAttributes = useMemo(() => {
@@ -151,16 +189,31 @@ const ProductDetail = () => {
 
     async function handleAddToBag() {
         if (!user) { navigate('/login'); return; }
-        if (!activeVariant) { setStockError('Please select a variant first.'); return; }
-        if (activeVariant.stock <= 0) { setStockError('This variant is out of stock.'); return; }
-        if (cartQtyForVariant >= activeVariant.stock) {
-            setStockError(`Only ${activeVariant.stock} available. You already have ${cartQtyForVariant} in bag.`);
+        
+        const hasVariants = product.variants?.length > 0;
+        
+        if (hasVariants && !activeVariant) { 
+            setStockError('Please select a variant first.'); 
+            return; 
+        }
+
+        const stock = hasVariants ? activeVariant.stock : 999; // Assume unlimited if no variant stock tracking
+        const currentQty = hasVariants ? cartQtyForVariant : (cartItems?.find(i => i.productId === productId && !i.variantId)?.quantity || 0);
+
+        if (hasVariants && activeVariant.stock <= 0) { 
+            setStockError('This variant is out of stock.'); 
+            return; 
+        }
+        
+        if (hasVariants && currentQty >= stock) {
+            setStockError(`Only ${stock} available. You already have ${currentQty} in bag.`);
             return;
         }
+
         try {
             setAdding(true);
             setStockError('');
-            await handleAddToCart(productId, activeVariant._id, 1);
+            await handleAddToCart(productId, activeVariant?._id || null, 1);
             setAddedFeedback(true);
             setTimeout(() => setAddedFeedback(false), 2000);
         } catch (err) {
@@ -171,8 +224,8 @@ const ProductDetail = () => {
         }
     }
 
-    const isAtStockLimit = activeVariant
-        ? (cartQtyForVariant >= activeVariant.stock || activeVariant.stock <= 0)
+    const isAtStockLimit = product.variants?.length > 0
+        ? (activeVariant ? (cartQtyForVariant >= activeVariant.stock || activeVariant.stock <= 0) : false)
         : false;
 
     return (
@@ -221,11 +274,16 @@ const ProductDetail = () => {
                             )}
 
                             <div className="relative w-full aspect-[4/5] overflow-hidden group border border-[#4d4732]" style={{ backgroundColor: '#1c1b1b' }}>
-                                <img
-                                    src={displayImages[selectedImage]?.url || displayImages[0]?.url}
-                                    alt={product.title}
-                                    className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
-                                />
+                                <button 
+                                    onClick={() => setShowLightbox(true)}
+                                    className="w-full h-full cursor-zoom-in"
+                                >
+                                    <img
+                                        src={displayImages[selectedImage]?.url || displayImages[0]?.url}
+                                        alt={product.title}
+                                        className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
+                                    />
+                                </button>
                                 {displayImages.length > 1 && (
                                     <>
                                         <button
@@ -268,12 +326,22 @@ const ProductDetail = () => {
                                 const isColor = isColorAttr(attrName);
                                 return (
                                     <div key={attrName} className="mb-8">
-                                        <h3 className="text-[9px] uppercase tracking-[0.4em] font-black mb-4" style={{ color: '#999077' }}>
-                                            {attrName}
-                                            {isColor && activeVariant && (
-                                                <span className="ml-3 normal-case tracking-normal opacity-60 text-[#e5e2e1]">
-                                                    — {selectedAttributes[attrName]}
-                                                </span>
+                                        <h3 className="text-[9px] uppercase tracking-[0.4em] font-black mb-4 flex justify-between items-center" style={{ color: '#999077' }}>
+                                            <span>
+                                                {attrName}
+                                                {isColor && activeVariant && (
+                                                    <span className="ml-3 normal-case tracking-normal opacity-60 text-[#e5e2e1]">
+                                                        — {selectedAttributes[attrName]}
+                                                    </span>
+                                                )}
+                                            </span>
+                                            {attrName.toLowerCase().includes('size') && (
+                                                <button 
+                                                    onClick={() => setShowSizeGuide(true)}
+                                                    className="text-[8px] underline tracking-[0.1em] hover:text-[#ffd700] transition-colors"
+                                                >
+                                                    Size Guide
+                                                </button>
                                             )}
                                         </h3>
 
@@ -363,12 +431,12 @@ const ProductDetail = () => {
                                 </p>
                             </div>
 
-                            {/* Add to Bag */}
-                            <div className="flex flex-col gap-4 mt-auto">
+                            {/* Add to Bag & Wishlist */}
+                            <div className="flex gap-4 mt-auto">
                                 <button
                                     onClick={handleAddToBag}
                                     disabled={adding || isAtStockLimit}
-                                    className="w-full py-5 text-[11px] uppercase tracking-[0.4em] font-black transition-all duration-500 active:scale-[0.98] border border-transparent shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="flex-1 py-5 text-[11px] uppercase tracking-[0.4em] font-black transition-all duration-500 active:scale-[0.98] border border-transparent shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed"
                                     style={{
                                         background: isAtStockLimit
                                             ? '#1c1b1b'
@@ -397,6 +465,20 @@ const ProductDetail = () => {
                                         activeVariant?.stock <= 0 ? 'Out of Stock' : `Max Stock Reached (${activeVariant.stock})`
                                     ) : 'Add to Shopping Bag'}
                                 </button>
+                                
+                                <button 
+                                    onClick={() => setIsWishlisted(!isWishlisted)}
+                                    className="w-16 flex items-center justify-center border border-[#4d4732] hover:border-[#ffd700] transition-colors"
+                                    style={{ backgroundColor: '#1c1b1b' }}
+                                >
+                                    <svg 
+                                        className={`w-5 h-5 transition-colors duration-300 ${isWishlisted ? 'fill-[#ffd700] stroke-[#ffd700]' : 'fill-none stroke-[#999077]'}`} 
+                                        viewBox="0 0 24 24" 
+                                        strokeWidth="2"
+                                    >
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                                    </svg>
+                                </button>
                             </div>
 
                             {/* Details table */}
@@ -410,6 +492,175 @@ const ProductDetail = () => {
                             </div>
                         </div>
                     </div>
+                </div>
+
+                {/* Related Products Section */}
+                {relatedProducts.length > 0 && (
+                    <div className="max-w-7xl mx-auto px-8 lg:px-16 xl:px-24 py-24 border-t border-[#4d4732]/30 mt-12">
+                        <div className="flex justify-between items-end mb-12">
+                            <div className="space-y-3">
+                                <h2 className="text-2xl md:text-4xl font-black uppercase tracking-tight" style={{ fontFamily: 'Manrope, sans-serif' }}>
+                                    You May <span className="opacity-40">Also Like</span>
+                                </h2>
+                                <div className="w-16 h-1" style={{ background: '#ffd700' }} />
+                            </div>
+                            <Link to="/" className="text-[10px] uppercase tracking-[0.3em] font-black text-[#999077] hover:text-[#ffd700] transition-colors">
+                                View Collection
+                            </Link>
+                        </div>
+                        
+                        <div className="flex gap-8 overflow-x-auto pb-8 scrollbar-hide snap-x">
+                            {relatedProducts.map(rp => (
+                                <div key={rp._id} className="min-w-[280px] md:min-w-[320px] snap-start">
+                                    <ProductCard product={rp} />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Product Reviews Section */}
+                <div className="max-w-7xl mx-auto px-8 lg:px-16 xl:px-24 py-24 border-t border-[#4d4732]/30 mt-12">
+                    <div className="flex flex-col md:flex-row gap-16">
+                        {/* Rating Summary */}
+                        <div className="md:w-1/3 space-y-6">
+                            <h2 className="text-2xl font-black uppercase tracking-tight" style={{ fontFamily: 'Manrope, sans-serif' }}>
+                                Guest <span className="opacity-40">Reviews</span>
+                            </h2>
+                            <div className="flex items-center gap-4">
+                                <span className="text-6xl font-black text-[#ffd700]">4.8</span>
+                                <div className="space-y-1">
+                                    <div className="flex gap-1">
+                                        {[1,2,3,4,5].map(i => (
+                                            <svg key={i} className="w-4 h-4 fill-[#ffd700]" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                        ))}
+                                    </div>
+                                    <p className="text-[10px] uppercase tracking-widest text-[#999077]">Based on 124 Reviews</p>
+                                </div>
+                            </div>
+                            <div className="space-y-3 pt-4">
+                                {[5,4,3,2,1].map(star => (
+                                    <div key={star} className="flex items-center gap-4">
+                                        <span className="text-[8px] w-2">{star}</span>
+                                        <div className="flex-1 h-1 bg-[#1c1b1b] overflow-hidden">
+                                            <div 
+                                                className="h-full bg-[#ffd700]/60" 
+                                                style={{ width: star === 5 ? '85%' : star === 4 ? '10%' : '2%' }}
+                                            />
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* User Reviews List */}
+                        <div className="md:w-2/3 space-y-12">
+                            {[
+                                { name: "Alexander K.", date: "Feb 12, 2025", text: "The weight and drape of this fabric is exceptional. Worth every penny of the premium price tag.", rating: 5 },
+                                { name: "Marcus V.", date: "Jan 28, 2025", text: "Clean lines and perfect fit. The nocturnal collection really hits different.", rating: 5 }
+                            ].map((rev, idx) => (
+                                <div key={idx} className="space-y-4 pb-8 border-b border-[#1c1b1b]">
+                                    <div className="flex justify-between items-center">
+                                        <div className="flex gap-1">
+                                            {[...Array(rev.rating)].map((_, i) => (
+                                                <svg key={i} className="w-3 h-3 fill-[#ffd700]" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                            ))}
+                                        </div>
+                                        <span className="text-[8px] text-[#999077] uppercase tracking-widest">{rev.date}</span>
+                                    </div>
+                                    <p className="text-xs leading-relaxed text-[#d0c6ab]">{rev.text}</p>
+                                    <p className="text-[10px] font-black uppercase tracking-tight text-[#e5e2e1]">{rev.name}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Lightbox Modal */}
+            {showLightbox && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-12 animate-in fade-in duration-300">
+                    <div 
+                        className="absolute inset-0 bg-black/95 backdrop-blur-sm" 
+                        onClick={() => setShowLightbox(false)}
+                    />
+                    <div className="relative max-w-4xl w-full h-full flex items-center justify-center pointer-events-none">
+                        <img 
+                            src={displayImages[selectedImage]?.url || displayImages[0]?.url} 
+                            className="max-w-full max-h-full object-contain pointer-events-auto"
+                        />
+                        <button 
+                            onClick={() => setShowLightbox(false)}
+                            className="absolute top-0 right-0 p-4 text-[#ffd700] pointer-events-auto hover:scale-110 transition-transform"
+                        >
+                            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* Size Guide Modal */}
+            {showSizeGuide && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-in zoom-in-95 duration-300">
+                    <div 
+                        className="absolute inset-0 bg-[#131313]/90 backdrop-blur-md" 
+                        onClick={() => setShowSizeGuide(false)}
+                    />
+                    <div className="relative w-full max-w-lg bg-[#1c1b1b] border border-[#4d4732] p-8 md:p-12 space-y-8">
+                        <div className="flex justify-between items-center">
+                            <h2 className="text-2xl font-black uppercase tracking-tighter" style={{ fontFamily: 'Manrope, sans-serif' }}>
+                                Size <span className="text-[#ffd700]">Chart</span>
+                            </h2>
+                            <button onClick={() => setShowSizeGuide(false)} className="text-[#999077] hover:text-[#ffd700]">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                            </button>
+                        </div>
+                        
+                        <div className="overflow-x-auto text-[10px] tracking-wide">
+                            <table className="w-full border-collapse">
+                                <thead>
+                                    <tr className="border-b border-[#4d4732]">
+                                        <th className="py-4 text-left uppercase text-[#999077]">Size</th>
+                                        <th className="py-4 text-left uppercase text-[#999077]">Chest (in)</th>
+                                        <th className="py-4 text-left uppercase text-[#999077]">Waist (in)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {[["S", "36-38", "30-32"], ["M", "39-41", "33-35"], ["L", "42-44", "36-38"], ["XL", "45-47", "39-41"]].map(([s, c, w]) => (
+                                        <tr key={s} className="border-b border-[#4d4732]/30">
+                                            <td className="py-4 font-black">{s}</td>
+                                            <td className="py-4 opacity-70">{c}</td>
+                                            <td className="py-4 opacity-70">{w}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <p className="text-[8px] text-[#999077] uppercase tracking-widest leading-loose">
+                            * Measurements are for garment dimensions. For the best fit, we recommend measuring a piece you already own and compare.
+                        </p>
+                    </div>
+                </div>
+            )}
+
+            {/* Sticky Mobile CTA */}
+            <div className={`fixed bottom-0 left-0 right-0 z-50 p-4 bg-[#131313]/90 backdrop-blur-xl border-t border-[#4d4732]/30 lg:hidden transition-transform duration-500 ${isStickyVisible ? 'translate-y-0' : 'translate-y-full'}`}>
+                <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-3 flex-1 overflow-hidden">
+                        <img src={displayImages[0]?.url} className="w-12 h-16 object-cover" />
+                        <div className="flex flex-col min-w-0">
+                            <span className="text-[10px] font-black uppercase truncate text-[#ffd700]">{product.title}</span>
+                            <span className="text-xs font-bold">{displayPrice?.currency} {displayPrice?.amount}</span>
+                        </div>
+                    </div>
+                    <button 
+                        onClick={handleAddToBag}
+                        disabled={adding || isAtStockLimit}
+                        className="px-6 py-3 bg-[#ffd700] text-[#131313] text-[10px] font-black uppercase tracking-widest disabled:opacity-50"
+                    >
+                        {adding ? '...' : (addedFeedback ? 'Added' : 'Add')}
+                    </button>
                 </div>
             </div>
         </div>

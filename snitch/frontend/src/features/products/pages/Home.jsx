@@ -1,8 +1,9 @@
 import { useSelector } from "react-redux"
 import { useProduct } from "../hook/useProduct"
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useMemo } from "react"
 import ProductCard from "../components/ProductCard"
 import { useLocation, useNavigate, Link } from "react-router"
+import React from "react"
 
 export default function Home() {
     const products = useSelector((state) => state.product.products)
@@ -10,6 +11,7 @@ export default function Home() {
     const location = useLocation()
     const navigate = useNavigate()
     const productsRef = useRef(null)
+    const [activeCategory, setActiveCategory] = React.useState("All")
     const query = new URLSearchParams(location.search).get("search")
 
     useEffect(() => {
@@ -19,6 +21,34 @@ export default function Home() {
     function scrollToProducts() {
         productsRef.current?.scrollIntoView({ behavior: "smooth" })
     }
+
+    const filteredProducts = useMemo(() => {
+        if (!products) return []
+        if (activeCategory === "All") return products
+        return products.filter(p => {
+            const title = (p.title || "").toLowerCase()
+            const desc = (p.description || "").toLowerCase()
+            const active = activeCategory.toLowerCase()
+            
+            if (active === "basics") {
+                return title.includes("basic") || title.includes("tee") || title.includes("t-shirt") || 
+                       desc.includes("basic") || desc.includes("tee")
+            }
+            if (active === "premium") {
+                return title.includes("premium") || title.includes("luxury") || title.includes("noir") ||
+                       desc.includes("premium") || desc.includes("luxury")
+            }
+            if (active === "shirts") {
+                // If it's a "Basic T-Shirt", it might fall into basics, 
+                // but let's prioritize "shirt" for this category
+                return (title.includes("shirt") && !title.includes("t-shirt")) || 
+                       title.includes("formal") || title.includes("linen") ||
+                       desc.includes("shirt")
+            }
+            
+            return title.includes(active) || desc.includes(active)
+        })
+    }, [products, activeCategory])
 
     return (
         <div className="flex flex-col" style={{ backgroundColor: "#131313", color: "#e5e2e1" }}>
@@ -165,8 +195,10 @@ export default function Home() {
 
                     <div className="flex gap-4">
                         {["All", "Shirts", "Basics", "Premium"].map((cat) => (
-                            <button key={cat}
-                                className={`text-[10px] tracking-[0.2em] uppercase font-bold px-4 py-2 border transition-all hover:border-[#ffd700] ${cat === "All" ? "border-[#ffd700] text-[#ffd700]" : "border-transparent text-[#999077]"}`}>
+                            <button 
+                                key={cat}
+                                onClick={() => setActiveCategory(cat)}
+                                className={`text-[10px] tracking-[0.2em] uppercase font-bold px-4 py-2 border transition-all hover:border-[#ffd700] ${cat === activeCategory ? "border-[#ffd700] text-[#ffd700]" : "border-transparent text-[#999077]"}`}>
                                 {cat}
                             </button>
                         ))}
@@ -175,8 +207,8 @@ export default function Home() {
 
                 {/* Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-16">
-                    {products && products.length > 0 ? (
-                        products.map((product) => (
+                    {filteredProducts && filteredProducts.length > 0 ? (
+                        filteredProducts.map((product) => (
                             <ProductCard key={product._id} product={product} />
                         ))
                     ) : (

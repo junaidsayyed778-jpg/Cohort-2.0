@@ -10,37 +10,39 @@ async function buildCartResponse(cart) {
     const product = await productModel.findById(item.product);
     if (!product) continue;
 
-    const variant = product.variants.id(item.variantId);
-    if (!variant) continue;
+    const variant = item.variantId ? product.variants.id(item.variantId) : null;
+    
+    // If a variant is specified in the cart item but not found on the product, skip it
+    if (item.variantId && !variant) continue;
 
     const unitPrice =
-      variant.price?.amount ?? product.price?.amount ?? 0;
+      variant?.price?.amount ?? product.price?.amount ?? 0;
     const currency =
-      variant.price?.currency ?? product.currency ?? "INR";
+      variant?.price?.currency ?? product.currency ?? "INR";
     const lineTotal = unitPrice * item.quantity;
     subtotal += lineTotal;
 
     enrichedItems.push({
       _id: item._id,
       productId: product._id,
-      variantId: variant._id,
+      variantId: variant?._id || null,
       title: product.title,
       description: product.description,
-      variantTitle: variant.title,
-      attributes: variant.attributes
+      variantTitle: variant?.title || null,
+      attributes: variant?.attributes
         ? (variant.attributes instanceof Map
             ? Object.fromEntries(variant.attributes)
             : { ...variant.attributes })
         : {},
       images:
-        variant.images?.length > 0 ? variant.images : product.images,
+        variant?.images?.length > 0 ? variant.images : product.images,
       price: {
         amount: unitPrice,
         currency,
       },
       lineTotal,
       quantity: item.quantity,
-      stock: variant.stock,
+      stock: variant ? variant.stock : 999, // Fallback high stock if no variant tracking
     });
   }
 
@@ -80,17 +82,21 @@ export async function addToCart(req, res) {
   try {
     const { productId, variantId, quantity = 1 } = req.body;
 
-    // Validate product + variant exist
+    // Validate product exist
     const product = await productModel.findById(productId);
     if (!product)
       return res.status(404).json({ success: false, message: "Product not found" });
 
-    const variant = product.variants.id(variantId);
-    if (!variant)
-      return res.status(404).json({ success: false, message: "Variant not found" });
-
-    if (variant.stock < 1)
-      return res.status(400).json({ success: false, message: "Out of stock" });
+    // If variantId is provided, validate it exists
+    let variant = null;
+    if (variantId) {
+      variant = product.variants.id(variantId);
+      if (!variant)
+        return res.status(404).json({ success: false, message: "Variant not found" });
+      
+      if (variant.stock < 1)
+        return res.status(400).json({ success: false, message: "Out of stock" });
+    }
 
     let cart = await cartModel.findOne({ user: req.user._id });
     if (!cart) {
@@ -100,13 +106,13 @@ export async function addToCart(req, res) {
     const existingItem = cart.items.find(
       (i) =>
         i.product.toString() === productId &&
-        i.variantId.toString() === variantId
+        (variantId ? i.variantId?.toString() === variantId.toString() : !i.variantId)
     );
 
     if (existingItem) {
       existingItem.quantity += Number(quantity);
     } else {
-      cart.items.push({ product: productId, variantId, quantity: Number(quantity) });
+      cart.items.push({ product: productId, variantId: variantId || null, quantity: Number(quantity) });
     }
 
     await cart.save();
@@ -139,7 +145,7 @@ export async function updateCartQuantity(req, res) {
     const item = cart.items.find(
       (i) =>
         i.product.toString() === productId &&
-        i.variantId.toString() === variantId
+        (variantId !== "null" && variantId !== "undefined" ? i.variantId?.toString() === variantId : !i.variantId)
     );
 
     if (!item)
@@ -173,7 +179,7 @@ export async function removeFromCart(req, res) {
       (i) =>
         !(
           i.product.toString() === productId &&
-          i.variantId.toString() === variantId
+          (variantId !== "null" && variantId !== "undefined" ? i.variantId?.toString() === variantId : !i.variantId)
         )
     );
 

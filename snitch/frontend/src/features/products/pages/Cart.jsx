@@ -2,15 +2,42 @@ import { useEffect } from "react"
 import { Link, useNavigate } from "react-router"
 import { useCart } from "../hook/useCart"
 import { useSelector } from "react-redux"
+import { useRazorpay } from "react-razorpay";
 
 export default function Cart() {
     const { items, subtotal, currency, loading, handleGetCart, handleUpdateQty, handleRemoveFromCart, handleClearCart } = useCart()
     const user = useSelector(s => s.auth.user)
     const navigate = useNavigate()
+      const { error, isLoading, Razorpay } = useRazorpay();
+
 
     useEffect(() => {
         if (user) handleGetCart()
     }, [user])
+
+
+    const handlePayment = () => {
+    const options = {
+      key: "YOUR_RAZORPAY_KEY",
+      amount: 50000, // Amount in paise
+      currency: "INR",
+      name: "Test Company",
+      description: "Test Transaction",
+      order_id: "order_9A33XWu170gUtm", // Generate order_id on server
+      handler: (response) => {
+        console.log(response);
+        alert("Payment Successful!");
+      },
+      prefill: {
+        name: "John Doe",
+        email: "john.doe@example.com",
+        contact: "9999999999",
+      },
+      theme: {
+        color: "#F37254",
+      },
+    }
+}
 
     if (!user) {
         return (
@@ -208,7 +235,7 @@ export default function Cart() {
                                 </div>
                             </div>
 
-                            <button className="w-full py-5 bg-[#ffd700] text-[#131313] text-[10px] tracking-[0.3em] font-black uppercase hover:brightness-110 active:scale-[0.98] transition-all">
+                            <button onClick={handlePayment} className="w-full py-5 bg-[#ffd700] text-[#131313] text-[10px] tracking-[0.3em] font-black uppercase hover:brightness-110 active:scale-[0.98] transition-all">
                                 Checkout
                             </button>
 
