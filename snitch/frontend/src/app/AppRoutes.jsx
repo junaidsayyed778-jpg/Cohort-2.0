@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router";
+import { createHashRouter } from "react-router";
 import Register from "../features/auth/pages/Register";
 import Login from "../features/auth/pages/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -13,7 +13,7 @@ import SellerProductDetails from "../features/products/pages/SellerProductDetail
 import UpdateVariant from "../features/products/pages/UpdateVariant";
 
 
-export const routes = createBrowserRouter([
+export const routes = createHashRouter([
   {
     path: "/",
     element: <Layout />,

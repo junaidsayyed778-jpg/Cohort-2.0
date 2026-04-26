@@ -11,8 +11,8 @@ async function sendTokenResponse(user, res, message) {
 
     res.cookie("token", token, {
         httpOnly: true,
-        secure: false, // Set to true in production
-        sameSite: "lax",
+        secure: true, 
+        sameSite: "none",
         maxAge: 7 * 24 * 60 * 60 * 1000,
     })
 
@@ -112,15 +112,16 @@ export const googleCallback = async (req, res) => {
         )
 
         res.cookie("token", token, {
-            secure: false,
-            sameSite: "lax",
+            httpOnly: true,
+            secure: true,
+            sameSite: "none",
             maxAge: 7 * 24 * 60 * 60 * 1000,
         })
 
-        res.redirect("https://cohort-2-0-b7p9.onrender.com/")
+        res.redirect("https://cohort-2-0-b7p9.onrender.com/#/")
     } catch (err) {
         console.error("Google callback error:", err)
-        res.redirect("https://cohort-2-0-b7p9.onrender.com/login")
+        res.redirect("https://cohort-2-0-b7p9.onrender.com/#/login")
     }
 }
 
@@ -144,8 +145,8 @@ export const getMe = async (req, res) => {
 export const logout = async (req, res) => {
     res.clearCookie("token", {
         httpOnly: true,
-        secure: false, // Set to true in production
-        sameSite: "lax",
+        secure: true, 
+        sameSite: "none",
     })
     res.status(200).json({ message: "User logged out successfully", success: true })
 }

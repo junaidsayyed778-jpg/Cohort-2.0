@@ -29,7 +29,7 @@ router.get(
   "/google/callback",
   passport.authenticate("google", {
     session: false,
-    failureRedirect: "https://cohort-2-0-b7p9.onrender.com/login",
+    failureRedirect: "https://cohort-2-0-b7p9.onrender.com/#/login",
   }),
   googleCallback,
 );
