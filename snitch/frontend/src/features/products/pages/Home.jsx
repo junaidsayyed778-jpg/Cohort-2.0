@@ -136,25 +136,7 @@ export default function Home() {
                             standards of modern fashion. Worn after dark.
                         </p>
 
-                        {/* CTAs */}
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 pt-2">
-                            <button
-                                onClick={scrollToProducts}
-                                className="px-10 py-4 text-[10px] tracking-[0.3em] font-black uppercase transition-all duration-300 hover:brightness-110 active:scale-95 cursor-pointer"
-                                style={{
-                                    background: "linear-gradient(135deg, #ffe16d 0%, #ffd700 100%)",
-                                    color: "#221b00"
-                                }}>
-                                Shop Collection
-                            </button>
-
-                            <button
-                                className="group flex items-center gap-3 text-[10px] tracking-[0.3em] font-black uppercase transition-colors hover:text-[#ffd700] cursor-pointer"
-                                style={{ color: "#999077" }}>
-                                <span>Editorial Book</span>
-                                <span className="transform group-hover:translate-x-1 transition-transform text-base">→</span>
-                            </button>
-                        </div>
+                       
 
                         {/* Scroll indicator */}
                         <div className="hidden lg:flex items-center gap-4 pt-8 opacity-40">
