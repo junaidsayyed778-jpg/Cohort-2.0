@@ -47,6 +47,3 @@ app.use("/api/cart", cartRoute)
 
 
 export default app
-
-
-
