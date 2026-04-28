@@ -5,7 +5,7 @@ import { useSelector } from "react-redux"
 import { useRazorpay } from "react-razorpay";
 
 export default function Cart() {
-    const { items, subtotal, currency, loading, handleGetCart, handleUpdateQty, handleRemoveFromCart, handleClearCart } = useCart()
+    const { items, subtotal, currency, loading, handleGetCart, handleUpdateQty, handleRemoveFromCart, handleClearCart, handleInitiateOrder, handleVerifyCartOrder } = useCart()
     const user = useSelector(s => s.auth.user)
     const navigate = useNavigate()
       const { error, isLoading, Razorpay } = useRazorpay();
@@ -16,28 +16,52 @@ export default function Cart() {
     }, [user])
 
 
-    const handlePayment = () => {
-    const options = {
-      key: "YOUR_RAZORPAY_KEY",
-      amount: 50000, // Amount in paise
-      currency: "INR",
-      name: "Test Company",
-      description: "Test Transaction",
-      order_id: "order_9A33XWu170gUtm", // Generate order_id on server
-      handler: (response) => {
-        console.log(response);
-        alert("Payment Successful!");
-      },
-      prefill: {
-        name: "John Doe",
-        email: "john.doe@example.com",
-        contact: "9999999999",
-      },
-      theme: {
-        color: "#F37254",
-      },
+    async function handleCheckOut() {
+        try {
+            const order = await handleInitiateOrder()
+            if (!order) {
+                alert("Failed to create order. Please try again.")
+                return
+            }
+
+            const options = {
+                key: "rzp_test_SiTBSGZwk9DYut", // MATCHED WITH BACKEND KEY
+                amount: order.amount,
+                currency: order.currency,
+                name: "Snitch",
+                description: "Purchase from Snitch",
+                order_id: order.id,
+                handler: async (response) => {
+                    const success = await handleVerifyCartOrder({
+                        razorpay_order_id: response.razorpay_order_id,
+                        razorpay_payment_id: response.razorpay_payment_id,
+                        razorpay_signature: response.razorpay_signature
+                    })
+
+                    if (success) {
+                        navigate(`/order-success?order_id=${response.razorpay_order_id}`)
+                    } else {
+                        alert("Payment verification failed")
+                    }
+                },
+                prefill: {
+                    name: user?.fullname,
+                    email: user?.email,
+                    contact: user?.contact,
+                },
+                theme: {
+                    color: "#ffd700",
+                },
+            };
+
+            const razorpayInstance = new Razorpay(options);
+            razorpayInstance.open();
+        } catch (error) {
+            console.error("Checkout failed:", error)
+            alert("Checkout failed. Please try again.")
+        }
     }
-}
+    
 
     if (!user) {
         return (
@@ -235,7 +259,7 @@ export default function Cart() {
                                 </div>
                             </div>
 
-                            <button onClick={handlePayment} className="w-full py-5 bg-[#ffd700] text-[#131313] text-[10px] tracking-[0.3em] font-black uppercase hover:brightness-110 active:scale-[0.98] transition-all">
+                            <button onClick={handleCheckOut} className="w-full py-5 bg-[#ffd700] text-[#131313] text-[10px] tracking-[0.3em] font-black uppercase hover:brightness-110 active:scale-[0.98] transition-all">
                                 Checkout
                             </button>
 

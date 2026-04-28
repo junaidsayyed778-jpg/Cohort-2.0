@@ -33,5 +33,7 @@ export const config = {
     NODE_ENV: process.env.NODE_ENV || "development",
     IMAGEKIT_PRIVATE_KEY,
     IMAGEKIT_PUBLIC_KEY,
-    IMAGEKIT_URL_ENDPOINT
+    IMAGEKIT_URL_ENDPOINT,
+    RAZORPAY_KEY_ID: getEnv("RAZORPAY_KEY_ID"),
+    RAZORPAY_KEY_SECRET: getEnv("RAZORPAY_KEY_SECRET")
 }

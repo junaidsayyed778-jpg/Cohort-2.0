@@ -1,5 +1,9 @@
 import cartModel from "../models/cartModel.js";
+import paymentModel from "../models/paymentModel.js";
 import productModel from "../models/productModel.js";
+import { createOrder } from "../services/paymentService.js";
+import crypto from "crypto";
+import { config } from "../config/config.js";
 
 // Helper: build enriched cart response with server-side totals
 async function buildCartResponse(cart) {
@@ -215,3 +219,126 @@ export async function clearCart(req, res) {
       .json({ success: false, message: "Failed to clear cart", error: err.message });
   }
 }
+
+export const createOrderController = async (req, res) => {
+  try {
+    const { paymentMethod = "razorpay" } = req.body;
+    const cart = await cartModel.findOne({ user: req.user._id });
+
+    if (!cart || cart.items.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Cart is empty",
+      });
+    }
+
+    const cartEnriched = await buildCartResponse(cart);
+
+    let order = null;
+    let paymentStatus = "pending";
+
+    if (paymentMethod === "razorpay") {
+      order = await createOrder({
+        amount: cartEnriched.subtotal,
+        currency: cartEnriched.currency,
+      });
+    } else if (paymentMethod === "cod") {
+      // For COD, we don't need a Razorpay order but we can generate a local unique ID if needed
+      // paymentStatus remains "pending" until delivery
+    }
+
+    const payment = await paymentModel.create({
+      user: req.user._id,
+      paymentMethod,
+      status: paymentStatus,
+      razorpay: order ? { orderId: order.id } : undefined,
+      price: {
+        amount: cartEnriched.subtotal,
+        currency: cartEnriched.currency,
+      },
+      orderItems: cartEnriched.items.map((item) => ({
+        title: item.title,
+        productId: item.productId,
+        variantId: item.variantId,
+        quantity: item.quantity,
+        images: item.images,
+        description: item.description,
+        price: item.price,
+      })),
+    });
+
+    if (paymentMethod === "cod") {
+      // Clear cart immediately for COD as the order is placed
+      cart.items = [];
+      await cart.save();
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: paymentMethod === "cod" ? "Order placed successfully (COD)" : "Razorpay order created",
+      order, // will be null for COD
+      paymentId: payment._id,
+    });
+  } catch (error) {
+    console.error("createOrderController error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to create order",
+      error: error.message,
+    });
+  }
+};
+
+
+
+export const verifyOrderController = async (req, res) => {
+  try {
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
+      req.body;
+
+    const sign = razorpay_order_id + "|" + razorpay_payment_id;
+    const expectedSign = crypto
+      .createHmac("sha256", config.RAZORPAY_KEY_SECRET)
+      .update(sign.toString())
+      .digest("hex");
+
+    if (expectedSign === razorpay_signature) {
+      const payment = await paymentModel.findOne({
+        "razorpay.orderId": razorpay_order_id,
+      });
+
+      if (!payment) {
+        return res
+          .status(404)
+          .json({ success: false, message: "Payment record not found" });
+      }
+
+      payment.status = "paid";
+      payment.razorpay.paymentId = razorpay_payment_id;
+      payment.razorpay.signature = razorpay_signature;
+      await payment.save();
+
+      // Clear the cart after successful payment
+      await cartModel.findOneAndUpdate(
+        { user: req.user._id },
+        { $set: { items: [] } }
+      );
+
+      return res
+        .status(200)
+        .json({ success: true, message: "Payment verified successfully" });
+    } else {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid signature" });
+    }
+  } catch (error) {
+    console.error("verifyOrderController error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+

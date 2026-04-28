@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from "react-redux"
-import { fetchCart, addItemToCart, updateItemQuantity, removeItemFromCart, clearCartApi } from "../service/cartApi"
+import { fetchCart, addItemToCart, updateItemQuantity, removeItemFromCart, clearCartApi, initiateCartOrder, verifyCartOrder } from "../service/cartApi"
 import { setCart, setCartLoading, setCartError, clearServerCart } from "../state/serverCartSlice"
 
 export const useCart = () => {
@@ -62,6 +62,16 @@ export const useCart = () => {
         }
     }
 
+    async function handleInitiateOrder(paymentMethod = "razorpay"){
+        const data = await initiateCartOrder(paymentMethod)
+        return data.order || data // Return order if exists, otherwise the whole data (for COD)
+    }
+
+    async function handleVerifyCartOrder(paymentData) {
+        const data = await verifyCartOrder(paymentData)
+        return data.success
+    }
+
     return {
         items,
         subtotal,
@@ -73,5 +83,7 @@ export const useCart = () => {
         handleUpdateQty,
         handleRemoveFromCart,
         handleClearCart,
+        handleInitiateOrder,
+        handleVerifyCartOrder
     }
 }

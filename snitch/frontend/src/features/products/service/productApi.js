@@ -1,7 +1,7 @@
 import axios from "axios"
 
 const productApiService = axios.create({
-    baseURL: "https://cohort-2-0-snitch-backend.onrender.com/api/products",
+    baseURL: "http://localhost:5000/api/products",
     withCredentials: true,
 })
 
