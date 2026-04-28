@@ -12,6 +12,7 @@ import Profile from "../features/auth/pages/Profile";
 import SellerProductDetails from "../features/products/pages/SellerProductDetails";
 import UpdateVariant from "../features/products/pages/UpdateVariant";
 import OrderSuccess from "../features/products/pages/OrderSuccess";
+import Orders from "../features/products/pages/Orders";
 
 
 export const routes = createBrowserRouter([
@@ -46,6 +47,10 @@ export const routes = createBrowserRouter([
       {
         path: "order-success",
         element: <OrderSuccess />
+      },
+      {
+        path: "orders",
+        element: <Orders />
       },
       {
         path: "seller",

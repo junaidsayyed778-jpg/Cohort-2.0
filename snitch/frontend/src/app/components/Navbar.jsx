@@ -70,10 +70,31 @@ export default function Navbar() {
 
                 {/* Desktop Nav Links */}
                 <div className="hidden md:flex items-center gap-10">
+                    {[
+                        { label: "Home", to: "/" },
+                        { label: "New Arrivals", to: "/" },
+                        { label: "Shop", to: "/" },
+                        { label: "Orders", to: "/orders" },
+                    ].map((link) => (
+                        <Link
+                            key={link.label}
+                            to={link.to}
+                            className="relative text-[10px] tracking-[0.25em] uppercase font-black transition-all hover:text-[#ffd700] py-2 group"
+                            style={{ 
+                                fontFamily: "Inter, sans-serif", 
+                                color: location.pathname === link.to ? "#ffd700" : "#e5e2e1",
+                                opacity: location.pathname === link.to ? 1 : 0.6 
+                            }}
+                        >
+                            {link.label}
+                            <span className={`absolute bottom-0 left-0 w-full h-[1px] bg-[#ffd700] transition-transform duration-300 origin-left ${location.pathname === link.to ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}`} />
+                        </Link>
+                    ))}
+                    
                     {user?.role === "seller" && (
                         <Link
                             to="/seller/dashboard"
-                            className="text-[10px] tracking-[0.25em] uppercase font-black transition-all"
+                            className="text-[10px] tracking-[0.25em] uppercase font-black transition-all hover:text-[#ffd700]"
                             style={{
                                 fontFamily: "Inter, sans-serif",
                                 color: isSellerDashboard ? "#ffd700" : "#e5e2e1",
@@ -224,13 +245,14 @@ export default function Navbar() {
                         { label: "New Arrivals", to: "/" },
                         { label: "Shop All", to: "/" },
                         { label: "Trending", to: "/" },
+                        { label: "Orders", to: "/orders" },
                         ...(user?.role === "seller" ? [{ label: "Seller Dashboard", to: "/seller/dashboard" }] : []),
                     ].map((link) => (
                         <Link
                             key={link.to + link.label}
                             to={link.to}
                             onClick={() => setSidebarOpen(false)}
-                            className="py-3 text-[11px] tracking-[0.25em] uppercase font-bold border-b border-[#4d4732]/20 text-[#e5e2e1] hover:text-[#ffd700] transition-colors"
+                            className={`py-3 text-[11px] tracking-[0.25em] uppercase font-bold border-b border-[#4d4732]/20 text-[#e5e2e1] hover:text-[#ffd700] transition-colors${location.pathname === link.to ? " text-[#ffd700]" : ""}`}
                         >
                             {link.label}
                         </Link>

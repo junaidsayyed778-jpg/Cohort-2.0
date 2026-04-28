@@ -45,3 +45,13 @@ export async function verifyCartOrder({ razorpay_order_id, razorpay_payment_id, 
     return response.data
 
 }
+
+export async function fetchUserOrders() {
+    const response = await cartApiService.get("/orders")
+    return response.data
+}
+
+export async function removeOrderFromHistory(orderId) {
+    const response = await cartApiService.delete(`/orders/${orderId}`)
+    return response.data
+}

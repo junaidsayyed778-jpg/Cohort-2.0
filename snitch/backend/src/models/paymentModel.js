@@ -7,6 +7,11 @@ const paymentSchema = new mongoose.Schema({
         enum: [ "pending", "paid", "failed" ],
         default: "pending"
     },
+    deliveryStatus: {
+        type: String,
+        enum: ["pending", "shipped", "delivered", "cancelled"],
+        default: "pending"
+    },
     price: {
         type: priceSchema,
         required: true

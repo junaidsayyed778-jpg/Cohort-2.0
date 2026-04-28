@@ -364,3 +364,37 @@ export const verifyOrderController = async (req, res) => {
   }
 };
 
+export const getUserOrders = async (req, res) => {
+  try {
+    const orders = await paymentModel.find({ user: req.user._id }).sort({ createdAt: -1 });
+    return res.status(200).json({
+      success: true,
+      orders,
+    });
+  } catch (error) {
+    console.error("getUserOrders error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch orders",
+      error: error.message,
+    });
+  }
+};
+
+export const removeOrder = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    await paymentModel.findOneAndDelete({ _id: orderId, user: req.user._id });
+    return res.status(200).json({
+      success: true,
+      message: "Order removed from history",
+    });
+  } catch (error) {
+    console.error("removeOrder error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to remove order",
+      error: error.message,
+    });
+  }
+};

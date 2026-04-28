@@ -8,6 +8,8 @@ import {
   clearCart,
   createOrderController,
   verifyOrderController,
+  getUserOrders,
+  removeOrder,
 } from "../controllers/cartController.js";
 
 const router = Router();
@@ -20,5 +22,7 @@ router.delete("/:productId/:variantId", authenticateUser, removeFromCart);
 router.delete("/", authenticateUser, clearCart);
 router.post("/payment/create/order", authenticateUser, createOrderController)
 router.post("/payment/verify/order", authenticateUser, verifyOrderController)
+router.get("/orders", authenticateUser, getUserOrders)
+router.delete("/orders/:orderId", authenticateUser, removeOrder)
 
 export default router;
