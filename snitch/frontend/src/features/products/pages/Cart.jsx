@@ -1,4 +1,4 @@
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { Link, useNavigate } from "react-router"
 import { useCart } from "../hook/useCart"
 import { useSelector } from "react-redux"
@@ -8,7 +8,8 @@ export default function Cart() {
     const { items, subtotal, currency, loading, handleGetCart, handleUpdateQty, handleRemoveFromCart, handleClearCart, handleInitiateOrder, handleVerifyCartOrder } = useCart()
     const user = useSelector(s => s.auth.user)
     const navigate = useNavigate()
-      const { error, isLoading, Razorpay } = useRazorpay();
+    const { error, isLoading, Razorpay } = useRazorpay();
+    const [paymentMethod, setPaymentMethod] = useState("razorpay") // Default to Online Payment
 
 
     useEffect(() => {
@@ -18,12 +19,20 @@ export default function Cart() {
 
     async function handleCheckOut() {
         try {
-            const order = await handleInitiateOrder()
-            if (!order) {
+            const result = await handleInitiateOrder(paymentMethod)
+            if (!result) {
                 alert("Failed to create order. Please try again.")
                 return
             }
 
+            if (paymentMethod === "cod") {
+                // Redirect directly for COD
+                navigate(`/order-success?order_id=${result.paymentId || "pending"}`)
+                return
+            }
+
+            // Razorpay logic
+            const order = result;
             const options = {
                 key: "rzp_test_SiTBSGZwk9DYut", // MATCHED WITH BACKEND KEY
                 amount: order.amount,
@@ -239,6 +248,33 @@ export default function Cart() {
                                         <span>{item.price?.currency} {item.lineTotal?.toLocaleString()}</span>
                                     </div>
                                 ))}
+                            </div>
+
+                            {/* Payment Method Selector */}
+                            <div className="space-y-4">
+                                <h3 className="text-[10px] tracking-[0.2em] uppercase font-black text-[#999077]">
+                                    Payment Method
+                                </h3>
+                                <div className="space-y-2">
+                                    <button 
+                                        onClick={() => setPaymentMethod("razorpay")}
+                                        className={`w-full py-3 px-4 flex items-center justify-between border ${paymentMethod === 'razorpay' ? 'border-[#ffd700] text-[#ffd700]' : 'border-[#4d4732]/30 text-[#999077]'} transition-all`}>
+                                        <div className="flex items-center gap-3">
+                                            <span className="material-symbols-outlined text-[18px]">credit_card</span>
+                                            <span className="text-[9px] tracking-widest uppercase font-bold">Online Payment</span>
+                                        </div>
+                                        {paymentMethod === 'razorpay' && <span className="material-symbols-outlined text-[14px]">check_circle</span>}
+                                    </button>
+                                    <button 
+                                        onClick={() => setPaymentMethod("cod")}
+                                        className={`w-full py-3 px-4 flex items-center justify-between border ${paymentMethod === 'cod' ? 'border-[#ffd700] text-[#ffd700]' : 'border-[#4d4732]/30 text-[#999077]'} transition-all`}>
+                                        <div className="flex items-center gap-3">
+                                            <span className="material-symbols-outlined text-[18px]">payments</span>
+                                            <span className="text-[9px] tracking-widest uppercase font-bold">Cash On Delivery</span>
+                                        </div>
+                                        {paymentMethod === 'cod' && <span className="material-symbols-outlined text-[14px]">check_circle</span>}
+                                    </button>
+                                </div>
                             </div>
 
                             <div className="space-y-4">

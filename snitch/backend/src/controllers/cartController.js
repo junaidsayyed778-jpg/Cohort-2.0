@@ -220,6 +220,22 @@ export async function clearCart(req, res) {
   }
 }
 
+// Helper: Decrement stock for order items
+async function decrementStock(orderItems) {
+  for (const item of orderItems) {
+    if (item.variantId) {
+      const product = await productModel.findById(item.productId);
+      if (product) {
+        const variant = product.variants.id(item.variantId);
+        if (variant) {
+          variant.stock = Math.max(0, variant.stock - item.quantity);
+          await product.save();
+        }
+      }
+    }
+  }
+}
+
 export const createOrderController = async (req, res) => {
   try {
     const { paymentMethod = "razorpay" } = req.body;
@@ -271,6 +287,9 @@ export const createOrderController = async (req, res) => {
       // Clear cart immediately for COD as the order is placed
       cart.items = [];
       await cart.save();
+
+      // Decrement stock for COD
+      await decrementStock(payment.orderItems);
     }
 
     return res.status(200).json({
@@ -323,6 +342,9 @@ export const verifyOrderController = async (req, res) => {
         { user: req.user._id },
         { $set: { items: [] } }
       );
+
+      // Decrement stock after successful online payment
+      await decrementStock(payment.orderItems);
 
       return res
         .status(200)
