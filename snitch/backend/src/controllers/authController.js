@@ -2,7 +2,7 @@ import { config } from "../config/config.js"
 import userModel from "../models/userModel.js"
 import jwt from "jsonwebtoken"
 
-async function sendTokenResponse(user, res, message) {
+async function sendTokenResponse(user, res, message){
     const token = jwt.sign({
         id: user._id,
     }, config.JWT_SECRET, {
