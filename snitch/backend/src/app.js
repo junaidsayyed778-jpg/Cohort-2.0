@@ -1,49 +1,65 @@
-import express from "express"
-import cookieParser from "cookie-parser"
-import morgan from "morgan"
-import cors from "cors"
-import authRoutes from "./routes/authRoutes.js"
-import productRoute from "./routes/productRoute.js"
-import cartRoute from "./routes/cartRoute.js"
-import {Strategy as GoogleStrategy} from "passport-google-oauth20"
-import passport from "passport"
-import { config } from "../src/config/config.js"
+import express from "express";
+import cookieParser from "cookie-parser";
+import morgan from "morgan";
+import cors from "cors";
+import authRoutes from "./routes/authRoutes.js";
+import productRoute from "./routes/productRoute.js";
+import cartRoute from "./routes/cartRoute.js";
+import { Strategy as GoogleStrategy } from "passport-google-oauth20";
+import passport from "passport";
+import { config } from "../src/config/config.js";
+import path from "path";
+import { fileURLToPath } from "url";
 
-const app = express()
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-app.use(morgan("dev"))
-app.use(express.json())
-app.use(express.urlencoded({extended: true}))
-app.use(cookieParser())
-app.use(cors({
+const app = express();
+
+app.use(express.static("public"));
+app.use(morgan("dev"));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+app.use(
+  cors({
     origin: [
-        "http://localhost:5173", 
-        "http://localhost:5174",
-        "https://cohort-2-0-b7p9.onrender.com",
+      "http://localhost:5173",
+      "http://localhost:5174",
+      "https://cohort-2-0-b7p9.onrender.com",
     ],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-    credentials: true
-}))
+    credentials: true,
+  }),
+);
 
 app.use(passport.initialize());
-passport.use(new GoogleStrategy ({
-    clientID: config.GOOGLE_CLIENT_ID,
-    clientSecret: config.GOOGLE_CLIENT_SECRET,
-    callbackURL: "https://cohort-2-0-snitch-backend.onrender.com/api/auth/google/callback"
-}, (accessToken, refreshToken, profile, done) =>{
-    return done(null, profile)
-}))
+passport.use(
+  new GoogleStrategy(
+    {
+      clientID: config.GOOGLE_CLIENT_ID,
+      clientSecret: config.GOOGLE_CLIENT_SECRET,
+      callbackURL:
+        "https://cohort-2-0-snitch-backend.onrender.com/api/auth/google/callback",
+    },
+    (accessToken, refreshToken, profile, done) => {
+      return done(null, profile);
+    },
+  ),
+);
 
 app.get("/", (req, res) => {
-    res.status(200).json({
-        message: "server is running"
-    })
-})
+  res.status(200).json({
+    message: "server is running",
+  });
+});
 
 // Auth routes
-app.use("/api/auth", authRoutes)
-app.use("/api/products", productRoute)
-app.use("/api/cart", cartRoute)
+app.use("/api/auth", authRoutes);
+app.use("/api/products", productRoute);
+app.use("/api/cart", cartRoute);
+app.get("*name", (req, res) => {
+  res.sendFile("public/index.html", { root: __dirname });
+});
 
-
-export default app
+export default app;
