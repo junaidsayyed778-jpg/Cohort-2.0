@@ -252,7 +252,7 @@ export default function Login() {
 
                         {/* Continue with Google */}
                         <a
-                            href="http://localhost:5000/api/auth/google"
+                            href="https://cohort-2-0-snitch-backend.onrender.com/api/auth/google"
                             className="w-full h-12 md:h-14 flex items-center justify-center gap-3 font-bold uppercase tracking-[0.15em] rounded-lg border-2 transition-all hover:brightness-125 cursor-pointer mt-4"
                             style={{
                                 fontFamily: "Inter, sans-serif",
