@@ -16,7 +16,7 @@ const connectToMongoDB = async () => {
 
 connectToMongoDB();
 
-const redis = new Redis(process.env.REDIS_URI);
+const redis = new Redis(process.env.REDIS_URL);
 
 redis.once("ready", () => {
     console.log("Connecting to Redis");
@@ -35,15 +35,16 @@ app.get("/user/:id", async (req, res) => {
                 data: JSON.parse(userFromCache),
             });
         }
-        
-        const user = await User.findOne({ _id: req.params.id });
 
-        await redis.set(
-            `user:${(req, params.id)}`,
-            JSON.stringify(user),
-            "EX",
-            3600,
-        ); // cache for 1 hour
+        const user = await User.findById(req.params.id);
+
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found",
+            });
+        }
+
+        await redis.set(`user:${req.params.id}`, JSON.stringify(user), "EX", 3600); // cache for 1 hour
 
         res.json({
             message: "User Fetched successfully",
