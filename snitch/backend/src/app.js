@@ -8,11 +8,7 @@ import cartRoute from "./routes/cartRoute.js";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import passport from "passport";
 import { config } from "../src/config/config.js";
-import path from "path";
-import { fileURLToPath } from "url";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const app = express();
 
@@ -58,8 +54,5 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoute);
 app.use("/api/cart", cartRoute);
-app.get("*name", (req, res) => {
-  res.sendFile("public/index.html", { root: __dirname });
-});
 
 export default app;
