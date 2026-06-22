@@ -4,7 +4,7 @@ import morgan from "morgan";
 import mongoose from "mongoose";
 import Redis from "ioredis";
 import { User } from "./models/userModel.js";
-import ratelimit from "express-rate-limit ";
+import rateLimit from "express-rate-limit";
 
 const connectToMongoDB = async () => {
     try {
