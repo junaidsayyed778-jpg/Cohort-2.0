@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
+import { User } from "../models/userModel";
 
 let mongoServer;
 
@@ -14,3 +15,38 @@ export const disconnect = async () => {
     await mongoose.disconnect();
     await mongoServer.stop();
 };
+
+export const clearCollections = async () => {
+    const collection = mongoose.connection.collection;
+    for (const key in collection) {
+        await collection[key].deleteMany({});
+    }
+};
+
+beforeAll(async () => await connect());
+afterAll(async () => await disconnect());
+afterEach(async () => await clearCollections());
+
+describe("User Model Test", () => {
+    it("should create and save user successfully", async () => {
+        const validUser = new User({
+            name: "John Doe",
+            email: "john.doe@example.com",
+        });
+        const saveUser = await validUser.save();
+        expect(saveUser.name).toBe("John Doe");
+        expect(saveUser.email).toBe("john.doe@example.com");
+    });
+});
+
+it("should fail to create user without requied fields", async () => {
+    const userWithoutRequiredField = new User({ name: "John Doe " });
+    let err;
+    try {
+        await userWithoutRequiredField.save();
+    } catch (error) {
+        err = error;
+    }
+
+    expect(err).toBeInstanceOf(mongoose.Error.ValidationError);
+});
