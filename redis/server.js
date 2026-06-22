@@ -4,6 +4,7 @@ import morgan from "morgan";
 import mongoose from "mongoose";
 import Redis from "ioredis";
 import { User } from "./models/userModel.js";
+import ratelimit from "express-rate-limit";
 
 const connectToMongoDB = async () => {
     try {
@@ -25,6 +26,17 @@ redis.once("ready", () => {
 const app = express();
 app.use(morgan("dev"));
 app.use(express.json());
+
+const globalLimiter = ratelimit({
+    windowMs: 1 * 60 * 1000,
+    max: 100,
+    message: {
+        error: "Too many requests, Please try again later."
+    },
+    statusCode: 429,
+    standardHeaders: true,
+    legacyHeaders: false,
+})
 
 app.get("/user/:id", async (req, res) => {
     try {
