@@ -4,7 +4,18 @@ import morgan from "morgan";
 import mongoose from "mongoose";
 import Redis from "ioredis";
 import { User } from "./models/userModel.js";
-import rateLimit from "express-rate-limit";
+import ratelimit from "express-rate-limit";
+import ejs from "ejs";
+
+const app = express();
+app.use(morgan("dev"));
+app.use(express.json());
+
+// ejs Template Engine Setup
+app.set("view engine", "ejs");
+app.set("views", "./views");
+
+app.use(express.static("public"));
 
 const connectToMongoDB = async () => {
     try {
@@ -23,20 +34,16 @@ redis.once("ready", () => {
     console.log("Connecting to Redis");
 });
 
-const app = express();
-app.use(morgan("dev"));
-app.use(express.json());
-
 const globalLimiter = ratelimit({
     windowMs: 1 * 60 * 1000,
     max: 100,
     message: {
-        error: "Too many requests, Please try again later."
+        error: "Too many requests, Please try again later.",
     },
     statusCode: 429,
     standardHeaders: true,
     legacyHeaders: false,
-})
+});
 
 app.get("/user/:id", async (req, res) => {
     try {
@@ -82,6 +89,13 @@ app.post("/user", async (req, res) => {
     }
 });
 
+app.get("/", async (req, res) => {
+    res.render("index", {
+        username: "Cohort User",
+        bio: "This is a sample bio for the user",
+        profilePicture: "https://plus.unsplash.com/premium_photo-1690407617542-2f210cf20d7e?w=700&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8cHJvZmlsZSUyMHBob3RvfGVufDB8fDB8fHww"
+    });
+});
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
