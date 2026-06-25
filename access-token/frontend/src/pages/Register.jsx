@@ -5,7 +5,7 @@ const Register = () => {
     const { register, handleSubmit, onRegister, errors, navigate } = useAuth()
 
     const handleNavigateToLogin = () => {
-        navigate('/login')
+        navigate('/')
     }
 
     const onInvalid = (errors) => {
