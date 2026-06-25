@@ -1,5 +1,5 @@
 import React from "react";
-import { createBrowserRouter, RouterProvider } from "react-router";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import AuthLayout from "../layouts/AuthLayout";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
@@ -7,6 +7,7 @@ import MainLayout from "../layouts/mainLayout";
 import Home from "../pages/Home";
 
 const AppRoutes = () => {
+ 
   const router = createBrowserRouter([
     {
       path: "/",
@@ -27,7 +28,7 @@ const AppRoutes = () => {
         element: <MainLayout/>,
         children: [
             {
-                path: "",
+                path: "/home",
                 element: <Home/>
             }
         ]

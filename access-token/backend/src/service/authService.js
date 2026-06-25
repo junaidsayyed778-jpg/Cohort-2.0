@@ -45,42 +45,45 @@ const registerService = async (data) => {
 
 const loginService = async (data) => {
   try {
-    const { email, password } = data;
+    const { email, username, password } = data;
 
-    if ((!email, !password))
-      return res.status(400).json({
-        message: "All fields are required",
-      });
+    if ((!email && !username) || !password) {
+      throw new Error("All fields are required");
+    }
 
-    const isExisted = await UserModel.findOne({
-      email,
+    const user = await UserModel.findOne({
+      $or: [
+        { email: email || "" },
+        { username: username || "" }
+      ]
     });
 
-    if (!isExisted)
-      return res.status(404).json({
-        message: "User not found",
-      });
+    if (!user) {
+      throw new Error("User not found");
+    }
 
-    const hashPass = await bcrypt.compare(password, isExisted.password);
+    const isMatch = await bcrypt.compare(
+      password,
+      user.password
+    );
 
-    if (!hashPass)
-      return res.status(401).json({
-        message: "Invalid credentials",
-      });
+    if (!isMatch) {
+      throw new Error("Invalid credentials");
+    }
 
-    let accessToken = generateAccessToken(isExisted._id);
-    let refreshToken = generateRefreshToken(isExisted._id);
+    const accessToken = generateAccessToken(user._id);
+    const refreshToken = generateRefreshToken(user._id);
 
-    isExisted.refreshToken = refreshToken;
-    await isExisted.save();
+    user.refreshToken = refreshToken;
+    await user.save();
 
     return {
       accessToken,
       refreshToken,
-      isExisted,
+      user
     };
   } catch (err) {
-    throw new Error(error);
+    throw new Error(err.message);
   }
 };
 

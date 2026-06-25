@@ -1,101 +1,114 @@
-import React, { useState } from 'react'
-import { useNavigate } from 'react-router'
-import { useAuth } from '../hooks/useAuth'
-// If you are using React Router, uncomment the line below:
-// import { useNavigate } from 'react-router-dom'
+import React from "react";
+import { useAuth } from "../hooks/useAuth";
 
 const Login = () => {
+  const { register, handleSubmit, onLogin, errors, navigate } = useAuth();
 
-    const navigate = useNavigate()
+  const handleNavigateToRegister = () => {
+    navigate("/register");
+  };
 
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
-  
-  // If using React Router, uncomment the line below:
-  // const navigate = useNavigate()
-
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    console.log('Form submitted:', { username, password })
-    // Add your actual login/authentication logic here
-  }
-
-
+  const onInvalid = (errors) => {
+    console.error("❌ Validation errors:", errors);
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg">
-        {/* Header */}
         <div className="text-center">
-          <h2 className="text-3xl font-extrabold text-gray-900">Sign in to your account</h2>
+          <h2 className="text-3xl font-extrabold text-gray-900">
+            Sign in to your account
+          </h2>
+
           <p className="mt-2 text-sm text-gray-600">
-            Or{' '}
-            <button 
-              type="button" 
-              onClick={()=> navigate("/register")}
-              className="font-medium text-blue-600 hover:text-blue-500 transition duration-150"
+            Or{" "}
+            <button
+              type="button"
+              onClick={handleNavigateToRegister}
+              className="font-medium text-blue-600 hover:text-blue-500"
             >
               create a new account
             </button>
           </p>
         </div>
 
-        {/* Form */}
-        <form  className="mt-8 space-y-6" onSubmit={handleSubmit}>
+        <form
+          className="mt-8 space-y-6"
+          onSubmit={handleSubmit(onLogin, onInvalid)}
+        >
           <div className="space-y-4">
-            {/* Username Input */}
             <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
-                Username
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Email
               </label>
+
               <input
-                id="username"
-                name="username"
-                type="text"
-                required
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-400 text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Enter your username"
+                id="email"
+                type="email"
+                {...register("email", {
+                  required: "Email is required",
+                  pattern: {
+                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                    message: "Invalid email address",
+                  },
+                })}
+                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter your email"
               />
+
+              {errors.email && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.email.message}
+                </p>
+              )}
             </div>
 
-            {/* Password Input */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Password
               </label>
+
               <input
                 id="password"
-                name="password"
                 type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-400 text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                autoComplete="current-password"
+                {...register("password", {
+                  required: "Password is required",
+                })}
+                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter your password"
               />
+
+              {errors.password && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.password.message}
+                </p>
+              )}
             </div>
           </div>
 
-          {/* Submit Button */}
           <div>
             <button
               type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 cursor-pointer"
+              className="group relative w-full flex justify-center py-2 px-4 text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 cursor-pointer"
             >
-              Sign in
+              Sign In
             </button>
           </div>
 
-          {/* Bottom Navigation Button */}
           <div className="text-center pt-2">
             <p className="text-sm text-gray-600">
-              Don't have an account?{' '}
+              Don't have an account?{" "}
               <button
                 type="button"
-                onClick={() => navigate("/register")}
-                className="font-semibold text-blue-600 hover:text-blue-500 transition duration-150"
+                onClick={handleNavigateToRegister}
+                className="font-semibold text-blue-600 hover:text-blue-500"
               >
                 Register here
               </button>
@@ -104,7 +117,7 @@ const Login = () => {
         </form>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Login
+export default Login;
