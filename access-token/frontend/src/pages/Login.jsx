@@ -1,7 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 
 const Login = () => {
+
+  const [serverError, setServerError] = useState("");
+
   const { register, handleSubmit, onLogin, errors, navigate } = useAuth();
 
   const handleNavigateToRegister = () => {
@@ -34,7 +37,10 @@ const Login = () => {
 
         <form
           className="mt-8 space-y-6"
-          onSubmit={handleSubmit(onLogin, onInvalid)}
+          onSubmit={handleSubmit(
+            (data) => onLogin(data, setServerError),
+            onInvalid
+          )}
         >
           <div className="space-y-4">
             <div>
@@ -55,7 +61,11 @@ const Login = () => {
                     message: "Invalid email address",
                   },
                 })}
-                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`appearance-none relative block w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2
+    ${errors.email || serverError
+                    ? "border-red-500 focus:ring-red-500"
+                    : "border-gray-300 focus:ring-blue-500"
+                  }`}
                 placeholder="Enter your email"
               />
 
@@ -81,10 +91,13 @@ const Login = () => {
                 {...register("password", {
                   required: "Password is required",
                 })}
-                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`appearance-none relative block w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2
+    ${errors.password || serverError
+                    ? "border-red-500 focus:ring-red-500"
+                    : "border-gray-300 focus:ring-blue-500"
+                  }`}
                 placeholder="Enter your password"
               />
-
               {errors.password && (
                 <p className="text-red-500 text-xs mt-1">
                   {errors.password.message}
@@ -94,6 +107,11 @@ const Login = () => {
           </div>
 
           <div>
+            {serverError && (
+              <div className="rounded-md bg-red-100 border border-red-400 text-red-700 px-4 py-3">
+                {serverError}
+              </div>
+            )}
             <button
               type="submit"
               className="group relative w-full flex justify-center py-2 px-4 text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 cursor-pointer"

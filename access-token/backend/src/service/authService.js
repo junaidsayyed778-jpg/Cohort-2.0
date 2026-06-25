@@ -9,7 +9,7 @@ const UserModel = require("../models/userModel.js");
 
 const registerService = async (data) => {
   try {
-    const { name, email, password } = data;
+    const { username, email, password } = data;
 
     if (!email || !password) throw new Error("all fields are required");
 
@@ -22,7 +22,7 @@ const registerService = async (data) => {
     let hashPass = bcrypt.hashSync(password, 10);
 
     const newUser = await UserModel.create({
-      name,
+      username,
       email,
       password: hashPass,
     });
@@ -39,7 +39,7 @@ const registerService = async (data) => {
       newUser,
     };
   } catch (err) {
-    throw new Error(error);
+    throw new Error(err.message);
   }
 };
 
@@ -87,8 +87,11 @@ const loginService = async (data) => {
   }
 };
 
-const getAccessTokenService = async (data) => {
-  const decode = jwt.verify(refreshToken, process.env.JWT_REFRESH_TOKEN);
+const getAccessTokenService = async (refreshToken) => {
+  const decode = jwt.verify(
+    refreshToken,
+    process.env.JWT_REFRESH_SECRET
+  );
   if (!decode) throw new Error("unauthorized");
 
   const user = await UserModel.findById(decode.id);

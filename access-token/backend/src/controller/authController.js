@@ -9,11 +9,18 @@ const registerController = async (req, res) => {
     req.body,
   );
 
-  res.cookie("accessToken", accessToken, {
+   res.cookie("accessToken", accessToken, {
     httpOnly: true,
     sameSite: "lax",
-    secure: true,
+    secure: false,
     maxAge: 10 * 60 * 1000,
+  });
+
+  res.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: false,
+    maxAge: 24 * 60 * 60 * 1000,
   });
 
   return res.status(201).json({
@@ -23,10 +30,17 @@ const registerController = async (req, res) => {
 };
 
 const loginController = async (req, res) => {
-  const { accessToken, refreshToken, user } =
-    await loginService(req.body);
+    try{
+  const { accessToken, refreshToken, user } = await loginService(req.body);
 
   res.cookie("accessToken", accessToken, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: false,
+    maxAge: 60 * 1000,
+  });
+
+  res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
     sameSite: "lax",
     secure: false,
@@ -37,9 +51,15 @@ const loginController = async (req, res) => {
     message: "User loginIn",
     user,
     accessToken,
-    refreshToken,
-  });
+     refreshToken,
+    });
+  } catch (err) {
+    return res.status(401).json({
+      message: err.message,
+    });
+  }
 };
+
 const getAccessTokenController = async (req, res) => {
   try {
     const refreshToken = req.cookies.refreshToken;
