@@ -13,11 +13,11 @@ const AppRoutes = () => {
       element: <AuthLayout />,
       children: [
         {
-            path: "",
+            path: "/login",
             element: <Login/>
         },
         {
-            path: "",
+            path: "/register",
             element: <Register/>
         }
       ],
