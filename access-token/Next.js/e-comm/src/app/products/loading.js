@@ -1,39 +1,48 @@
 import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent } from "@/components/ui/card";
 
 const Loading = () => {
   return (
     <div className="container mx-auto px-6 py-8">
-      {/* Page Heading */}
-      <Skeleton className="h-8 w-56 mb-8" />
+      {/* Page Title */}
+      <Skeleton className="mb-8 h-8 w-56" />
 
-      {/* Product Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      {/* Products */}
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {Array.from({ length: 8 }).map((_, index) => (
-          <div
-            key={index}
-            className="border rounded-xl p-4 bg-white shadow-sm"
-          >
-            {/* Product Image */}
-            <Skeleton className="h-52 w-full rounded-lg" />
-
-            {/* Title */}
-            <Skeleton className="h-5 w-3/4 mt-4" />
-
-            {/* Category */}
-            <Skeleton className="h-4 w-1/2 mt-2" />
-
-            {/* Rating */}
-            <div className="flex items-center gap-2 mt-3">
-              <Skeleton className="h-4 w-16" />
-              <Skeleton className="h-4 w-10" />
+          <Card key={index} className="overflow-hidden">
+            {/* Image */}
+            <div className="flex h-64 items-center justify-center bg-muted p-6">
+              <Skeleton className="h-48 w-40 rounded-md" />
             </div>
 
-            {/* Price */}
-            <Skeleton className="h-6 w-20 mt-4" />
+            <CardContent className="space-y-4 p-5">
+              {/* Category Badge */}
+              <Skeleton className="h-6 w-24 rounded-full" />
 
-            {/* Button */}
-            <Skeleton className="h-10 w-full mt-5 rounded-lg" />
-          </div>
+              {/* Title */}
+              <div className="space-y-2">
+                <Skeleton className="h-5 w-full" />
+                <Skeleton className="h-5 w-3/4" />
+              </div>
+
+              {/* Description */}
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-2/3" />
+              </div>
+
+              {/* Price + Rating */}
+              <div className="flex items-center justify-between">
+                <Skeleton className="h-7 w-20" />
+                <Skeleton className="h-5 w-16" />
+              </div>
+
+              {/* Button */}
+              <Skeleton className="h-10 w-full rounded-md" />
+            </CardContent>
+          </Card>
         ))}
       </div>
     </div>
