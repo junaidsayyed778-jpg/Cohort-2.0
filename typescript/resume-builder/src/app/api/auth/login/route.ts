@@ -2,22 +2,22 @@ import { generateToken } from "@/lib/jwt";
 import { connectDB } from "@/lib/mongodb";
 import UserModel from "@/models/userModel";
 import { ApiResponse } from "@/types/apiTypes";
-import { RegisterBody } from "@/types/userTypes";
+import { LoginBody } from "@/types/userTypes";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(req: NextRequest) {
+export async function POST(req: NextRequest){
     try {
         await connectDB();
 
-        const body: RegisterBody = await req.json();
+        const body: LoginBody = await req.json();
 
-        const { name, email, mobile, password } = body;
+        const { email, password } = body;
 
-        if (!name || !email || !password) {
+        if ( !email || !password) {
             return NextResponse.json<ApiResponse>(
                 {
                     success: false,
-                    message: "All fields are reuired",
+                    message: "All fields are required",
                 },
                 {
                     status: 409,
@@ -26,25 +26,25 @@ export async function POST(req: NextRequest) {
         }
 
         const isExisted = await UserModel.findOne({ email });
-        if (isExisted)
+
+        if (!isExisted)
             return NextResponse.json<ApiResponse>(
                 {
                     success: false,
-                    message: "User already exist",
+                    message: "User not existed",
                 },
                 {
-                    status: 400,
+                    status: 404,
                 },
             );
 
-        const newUser = await UserModel.create({
-            name,
-            email,
-            password,
-            mobile,
-        });
+        const matchPass = isExisted.comparePass(password)
 
-        const token = generateToken({ userId: newUser._id.toString() });
+        if(!matchPass) return NextResponse.json<ApiResponse>({
+            success: false, message: "Invalid credentials"
+        },{status: 401})
+
+        const token = generateToken({ userId: isExisted._id.toString() });
 
         const response = NextResponse.json<ApiResponse>(
             {
@@ -52,9 +52,9 @@ export async function POST(req: NextRequest) {
                 message: "User registered successfully",
                 data: {
                     user: {
-                        _id: newUser._id,
-                        name: newUser.name,
-                        email: newUser.email,
+                        _id: isExisted._id,
+                        name: isExisted.name,
+                        email: isExisted.email,
                     },
                 },
             },
