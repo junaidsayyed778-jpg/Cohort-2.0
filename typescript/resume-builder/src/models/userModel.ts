@@ -1,5 +1,5 @@
 import { IUser } from "@/types/userTypes";
-import mongoose from "mongoose";
+import mongoose, { Document } from "mongoose";
 import bcrypt from "bcrypt";
 
 interface UserDocument extends Omit<IUser, "_id">, Document{
@@ -31,9 +31,13 @@ const userSchema = new mongoose.Schema<UserDocument>(
   { timestamps: true },
 );
 
-userSchema.pre("save", function (): void {
-  if (!this.isModified("password")) return;
+userSchema.pre("save", function (next) {
+  if (!this.isModified("password")) {
+    return next();
+  }
+
   this.password = bcrypt.hashSync(this.password, 10);
+  next();
 });
 
 userSchema.methods.comparePass = function (candidataPassword: string): boolean {

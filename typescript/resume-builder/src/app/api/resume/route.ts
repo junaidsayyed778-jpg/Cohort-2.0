@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
   try {
     await connectDB();
 
-    const {userId} = await getCurrentUser();
+    const { userId } = await getCurrentUser();
 
     const newResume = await ResumeModel.create({
       user_id: userId,
@@ -41,3 +41,5 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+

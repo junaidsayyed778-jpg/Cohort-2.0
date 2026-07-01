@@ -62,7 +62,7 @@ export async function PATCH(
 
     const { resumeId } = await params;
 
-    const updateResume = await ResumeModel.findOneAndUpdate({
+    const updateResume = await ResumeModel.findByIdAndUpdate({
         _id: resumeId,
         user_id: user.userId,
     }, {
@@ -76,7 +76,7 @@ export async function PATCH(
       return NextResponse.json<ApiResponse>(
         {
           success: false,
-          message: "updateResume failed",
+          message: "resume updated failed",
         },
         { status: 404 },
       );
@@ -84,7 +84,7 @@ export async function PATCH(
     return NextResponse.json<ApiResponse>(
       {
         success: true,
-        message: "updateResume successfully",
+        message: "resume updated successfully",
         data: updateResume,
       },
       { status: 200 },
