@@ -1,18 +1,22 @@
 "use client";
 
 import axios from "axios";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 
 import { ArrowLeft, ArrowRight, Plus, Trash2, Sparkles } from "lucide-react";
 
 interface Props {
-  resumeId: unknown;
+  resumeId: string;
   onNext: () => void;
   onBack: () => void;
 }
 
-interface Project {
+export default function ProjectsStep({ resumeId, onNext, onBack }: Props) {
+  const [aiLoading, setAiLoading] = useState<Record<number, boolean>>({});
+
+
+  interface Project {
   title: string;
   techStack: string;
   description: string;
@@ -31,7 +35,8 @@ interface ProjectForm {
   githubUrl: string;
   liveUrl: string;
 }
-export default function ProjectsStep({ resumeId, onNext, onBack }: Props) {
+
+
   const {
     register,
     control,
@@ -59,50 +64,54 @@ export default function ProjectsStep({ resumeId, onNext, onBack }: Props) {
     name: "projects",
   });
 
-const fetchResume = async () => {
-  try {
-    const { data } = await axios.get(`/api/resume/${resumeId}`);
+  useEffect(() => {
+    const fetchResume = async () => {
+      try {
+        const { data } = await axios.get(`/api/resume/${resumeId}`);
 
-    if (data.resume.projects?.length) {
-      reset({
-        projects: data.resume.projects.map((project: ProjectForm) => ({
-          ...project,
-          techStack: Array.isArray(project.techStack)
-            ? project.techStack.join(", ")
-            : "",
-        })),
-      });
-    }
-  } catch (error) {
-    console.error(error);
-  }
-};
+        if (data.resume.projects?.length) {
+          reset({
+            projects: data.resume.projects.map((project: ProjectForm) => ({
+              ...project,
 
-useEffect(() => {
-  fetchResume();
-}, [resumeId]);
+              techStack: Array.isArray(project.techStack)
+                ? project.techStack.join(", ")
+                : "",
+            })),
+          });
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    fetchResume();
+  }, [resumeId, reset]);
 
   const generateDescription = async (index: number) => {
     try {
-      const project = watch(`projects.${index}`);
-
-      const { data: resumeData } = await axios.get(`/api/resume/${resumeId}`);
-
-      const resume = resumeData.resume;
+      setAiLoading((prev) => ({
+        ...prev,
+        [index]: true,
+      }));
 
       const { data } = await axios.post(
         "/api/ai/generate-project-description",
         {
           jobTitle: "web developer",
           experienceLevel: "mid-level",
-          techStack: ["html", "css", "react", "nodejs"],
-        }
+          techStack: ["React", "Next.js", "MongoDB"],
+        },
       );
-      console.log("data we get from project description", data);
 
       setValue(`projects.${index}.description`, data.data.projectDescription);
     } catch (error) {
       console.log(error);
+    } finally {
+      setAiLoading((prev) => ({
+        ...prev,
+        [index]: false,
+      }));
     }
   };
 
@@ -211,11 +220,21 @@ useEffect(() => {
                   <div className="flex justify-end mb-3">
                     <button
                       type="button"
+                      disabled={aiLoading[index]}
                       onClick={() => generateDescription(index)}
-                      className="flex items-center gap-2 bg-violet-100 text-violet-700 px-4 py-2 rounded-xl"
+                      className="flex items-center gap-2 bg-violet-100 text-violet-700 px-4 py-2 rounded-xl disabled:opacity-50"
                     >
-                      <Sparkles size={18} />
-                      Generate Description
+                      {aiLoading[index] ? (
+                        <>
+                          <Sparkles size={18} className="animate-spin" />
+                          Generating...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles size={18} />
+                          Generate Description
+                        </>
+                      )}
                     </button>
                   </div>
 
